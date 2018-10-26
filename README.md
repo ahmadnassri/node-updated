@@ -6,7 +6,7 @@
 
 ## Motivation
 
-While, there are [many package dependency checking tools][1], they all come with some gotchas:
+While there are [many package dependency checking tools][1], they all come with some gotchas:
 
 - **cli dependencies**:  
   While having dependencies for a CLI package is not an issue in itself, the dependencies themselves often come with vulnerabilities, and will inevitably fall behind as maintainers are not able to keep up with upstream changes.
