@@ -1,0 +1,44 @@
+{
+  "private": false,
+  "version": "0.0.0-development",
+  "name": "updated",
+  "description": "check for updated package.json dependencies",
+  "author": "Ahmad Nassri <ahmad@ahmadnassri.com> (https://www.ahmadnassri.com)",
+  "homepage": "https://www.ahmadnassri.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmadnassri/node-updated.git"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "keywords": [
+    "node",
+    "package",
+    "updates",
+    "check",
+    "dependencies",
+    "outdated"
+  ],
+  "engines": {
+    "node": ">=8"
+  },
+  "files": [
+    "lib",
+    "index.js"
+  ],
+  "bugs": {
+    "url": "https://github.com/ahmadnassri/node-updated/issues"
+  },
+  "scripts": {
+    "lint:ec": "npx editorconfig-checker .",
+    "lint:js": "npx eslint .",
+    "lint:md": "npx remark --quiet --frail .",
+    "lint": "npx run-p lint:*",
+    "open:coverage": "opener coverage/lcov-report/index.html",
+    "test:tap": "tap test --100 --coverage-report=lcov --no-browser",
+    "test": "npx run-p test:*"
+  },
+  "devDependencies": {
+    "tap": "^12.0.1"
+  }
+}

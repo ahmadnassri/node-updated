@@ -1,0 +1,8 @@
+{
+  "name": "green",
+  "version": "0.0.0",
+  "dependencies": {
+    "@ahmadnassri/node-create": "ahmadnassri/node-create",
+    "npm": "*"
+  }
+}

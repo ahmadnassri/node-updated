@@ -1,0 +1,19 @@
+{
+  "name": "red",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@ahmadnassri/node-create": "ahmadnassri/node-create",
+    "nothingness": "github:othiym23/nothingness#master",
+    "once": "^1.3.1"
+  },
+  "dependencies": {
+    "glob": "^5.0.15",
+    "connect": "^2.30.1"
+  },
+  "peerDependencies": {
+    "npm": "^3.5.1"
+  },
+  "optionalDependencies": {
+    "@telusdigital/nightwatch-seo": "*"
+  }
+}
