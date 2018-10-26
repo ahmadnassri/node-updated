@@ -38,10 +38,21 @@ The following types of packages are not supported:
 
 ## Features
 
-- **ZERO** dependencies
-- uses `npm` cli directly
-- CI friendly
-- configurable through `ENV` variables
+- **ZERO dependencies**  
+  keeping this package lean for use with CI.
+
+- **uses `npm`**  
+  uses the `npm show` cli command directly, which allows matching your actual `npm` environment and project config.
+
+- **CI friendly**  
+  through proper usage of standard streams _(`stdout`, `stderr`)_ and exit codes.
+
+- **configurable** 
+  use [`ENV`](#environment-flags) variables to control behaviour.
+
+- **compares against `package.json`**  
+  `updated` will **ONLY** look at `package.json` and query npm with the **same version ranges** you define, to better simulate what `npm install` will produce. and avoid pointless errors.  
+  > _**e.g.** `updated@^1.0.0` is still valid if the latest is `updated@^1.0.1` because `npm install` will grab the latter._
 
 ## Install
 
