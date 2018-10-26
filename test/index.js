@@ -12,11 +12,21 @@ test('success', assert => {
   assert.equal(result.status, 0)
 })
 
-test('fail', assert => {
-  assert.plan(1)
+test('outdated', assert => {
+  assert.plan(2)
 
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'red') })
+  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'outdated') })
 
+  assert.match(result.stderr.toString(), /OUTDATED/)
+  assert.equal(result.status, 1)
+})
+
+test('not-found', assert => {
+  assert.plan(2)
+
+  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'not-found') })
+
+  assert.match(result.stderr.toString(), /NOT-FOUND/)
   assert.equal(result.status, 1)
 })
 
@@ -26,7 +36,7 @@ test('silent', assert => {
   const env = process.env
   env['UPDATED_SILENT'] = true
 
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'red'), env })
+  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'outdated'), env })
 
   assert.equal(result.stderr.length, 0)
   assert.equal(result.status, 1)
@@ -38,7 +48,7 @@ test('json', assert => {
   const env = process.env
   env['UPDATED_JSON'] = true
 
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'red'), env })
+  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'outdated'), env })
 
   assert.match(result.stdout.toString(), /"error":"outdated"/)
   assert.equal(result.status, 1)

@@ -1,0 +1,7 @@
+{
+  "name": "red",
+  "version": "0.0.0",
+  "peerDependencies": {
+    "updated": "0.0.0"
+  }
+}
