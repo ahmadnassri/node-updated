@@ -70,7 +70,7 @@ Promise
     }
 
     if (process.args.update) {
-      writeFileSync(packageFile, JSON.stringify(pkg, null, 2), (err) => {
+      writeFileSync(packageFile, JSON.stringify(pkg, null, 2) + '\n', (err) => {
         if (err) throw err
         console.log('package.json updated')
       })
