@@ -44,7 +44,7 @@ test('json', assert => {
 
   const result = spawnSync('node', args.concat(['--json']), { cwd: join(__dirname, 'fixtures', 'outdated') })
 
-  assert.match(result.stdout.toString(), /"error":"outdated"/)
+  assert.match(result.stdout.toString(), /"status":"outdated"/)
   assert.equal(result.status, 1)
 })
 
