@@ -52,8 +52,7 @@ workflows:
   version: 2
   run:
     jobs:
-      - build:
-          context: npm
+      - build
 
       - lint:
           requires: [ build ]
@@ -62,7 +61,7 @@ workflows:
           requires: [ build ]
 
       - release:
-          context: npm
+          context: semantic-release
           requires: [ build, lint, unit ]
           filters:
             branches:
