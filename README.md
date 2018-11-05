@@ -76,7 +76,7 @@ OUTDATED        ^3.5.1 → 6.4.1          npm @ ^3.5.1
 ```
 
 > _**Tip**: You can check the last exit code by running `echo $?`_  
-  
+>
 > _**Tip**: You don't need to install this package or add it to your dependencies, just run `npx updated`_
 
 ## Options
