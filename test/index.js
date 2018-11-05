@@ -33,10 +33,7 @@ test('not-found', assert => {
 test('silent', assert => {
   assert.plan(2)
 
-  const env = process.env
-  env['UPDATED_SILENT'] = true
-
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'outdated'), env })
+  const result = spawnSync('node', args.concat(['--silent']), { cwd: join(__dirname, 'fixtures', 'outdated') })
 
   assert.equal(result.stderr.length, 0)
   assert.equal(result.status, 1)
@@ -45,10 +42,7 @@ test('silent', assert => {
 test('json', assert => {
   assert.plan(2)
 
-  const env = process.env
-  env['UPDATED_JSON'] = true
-
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'outdated'), env })
+  const result = spawnSync('node', args.concat(['--json']), { cwd: join(__dirname, 'fixtures', 'outdated') })
 
   assert.match(result.stdout.toString(), /"error":"outdated"/)
   assert.equal(result.status, 1)

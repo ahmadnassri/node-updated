@@ -1,20 +1,32 @@
 #!/usr/bin/env node
 
+const { writeFileSync } = require('fs')
+
+// update flag
+process.args = {
+  color: process.argv.includes('--color'),
+  update: process.argv.includes('--update'),
+  json: process.argv.includes('--json'),
+  silent: process.argv.includes('--silent')
+}
+
+const { red, reset } = require('./lib/colors')
+
 // clean errors
 function uncaught (error) {
   switch (error.issue) {
     case 'spawn':
-      console.error('ERROR\t failed to run `npm show`')
+      console.error(red, 'ERROR', reset, 'failed to run `npm show`')
       break
 
     /* istanbul ignore next */
     case 'json':
-      console.error('ERROR\t failed to parse `npm show` output')
+      console.error(red, 'ERROR', reset, 'failed to parse `npm show` output')
       break
 
     /* istanbul ignore next */
     default:
-      console.error('ERROR\t', error.message || error)
+      console.error(red, 'ERROR', reset, error.message || error)
   }
 
   process.exit(1)
@@ -28,8 +40,10 @@ process.on('unhandledRejection', uncaught)
 const { join } = require('path')
 const check = require('./lib/check')
 
+const packageFile = join(process.cwd(), 'package.json')
+
 // read package.json
-const pkg = require(join(process.cwd(), 'package.json'))
+const pkg = require(packageFile)
 
 // dependencies collection
 const dependencies = []
@@ -42,7 +56,7 @@ types.forEach(type => {
   if (!pkg[type]) return
 
   // loop & gather
-  Object.entries(pkg[type]).forEach(([name, version]) => dependencies.push({ type, name, version }))
+  Object.entries(pkg[type]).forEach(([name, version]) => dependencies.push({ pkg, type, name, version }))
 })
 
 // let's do this!
@@ -50,9 +64,16 @@ Promise
   .all(dependencies.map(check))
   .then(output => {
     // JSON
-    if (process.env.UPDATED_JSON) {
+    if (process.args.json) {
       console.log(JSON.stringify(output))
       process.exit(1)
+    }
+
+    if (process.args.update) {
+      writeFileSync(packageFile, JSON.stringify(pkg, null, 2), (err) => {
+        if (err) throw err
+        console.log('package.json updated')
+      })
     }
 
     // conditional exit code

@@ -14,7 +14,6 @@ While there are [many package dependency checking tools][1], they all come with 
 - **npm API dependency**:  
   This means figuring out which `.npmrc` to parse, how to parse it meaningfully, essentially repeating `npm` cli's own logic, this gets complicated when your `.npmrc` file mixes multiple registries and scopes!
 
-
 - **exit codes & standard streams**:  
   some of the solutions do not use proper exit codes _(e.g. `0` for success `1` for failure)_ and rely on `console.log` for all outputs instead of properly streaming results to `stdout` and `stderr`. This makes them incompatible for usage within a CI process.
 
@@ -38,6 +37,9 @@ The following types of packages are not supported:
 
 ## Features
 
+- **Asynchronous**
+  runs each package check asynchronously, with immediate feedback to `stdout`
+
 - **ZERO dependencies**  
   keeping this package lean for use with CI.
 
@@ -47,8 +49,8 @@ The following types of packages are not supported:
 - **CI friendly**  
   through proper usage of standard streams _(`stdout`, `stderr`)_ and exit codes.
 
-- **configurable** 
-  use [`ENV`](#environment-flags) variables to control behaviour.
+- **configurable**
+  use simple [arguments](#options) to control behaviour.
 
 - **compares against `package.json`**  
   `updated` will **ONLY** look at `package.json` and query npm with the **same version ranges** you define, to better simulate what `npm install` will produce. and avoid pointless errors.  
@@ -67,22 +69,24 @@ Run in your project's folder with `package.json`:
 ```bash
 $ updated
 
-UNSUPPORTED      [@ahmadnassri/node-create] ahmadnassri/node-create
-UNSUPPORTED      [nothingness] github:othiym23/nothingness#master
-DEPRECATED       [connect@^2.30.1]: match: ^2.30.1 • latest: 3.6.6
-DEPRECATED       [@telusdigital/nightwatch-seo@*]: match: * • latest: 1.2.2
-OUTDATED         [glob@^5.0.15]: match: ^5.0.15 • latest: 7.1.3
-OUTDATED         [npm@^3.5.1]: match: ^3.5.1 • latest: 6.4.1
+DEPRECATED      ^2.30.1 → 3.6.6         connect @ ^2.30.1
+OUTDATED        ^5.0.15 → 7.1.3         glob @ ^5.0.15
+DEPRECATED      * → 1.2.2               @telusdigital/nightwatch-seo @ *
+OUTDATED        ^3.5.1 → 6.4.1          npm @ ^3.5.1
 ```
 
-> _**Tip**: You can check the last exit code by running `echo $?`_
+> _**Tip**: You can check the last exit code by running `echo $?`_  
+  
+> _**Tip**: You don't need to install this package or add it to your dependencies, just run `npx updated`_
 
-## Environment Flags
+## Options
 
-| Name                        | Description                     |
-| --------------------------- | ------------------------------- |
-| `UPDATED_JSON`              | output JSON results to `stdout` |
-| `UPDATED_SILENT`            | no putput on `stderr`           |
+| Name       | Description                              |
+| ---------- | ---------------------------------------- |
+| `--json`   | output JSON results to `stdout`          |
+| `--silent` | no putput on `stderr`                    |
+| `--color`  | pretty colors!                           |
+| `--update` | update `package.json` to latest versions |
 
 ## Exit Codes
 
