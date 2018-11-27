@@ -63,7 +63,6 @@ types.forEach(type => {
 Promise
   .all(dependencies.map(check))
   .then(output => {
-
     // JSON
     if (process.args.json) {
       console.log(JSON.stringify(output.filter(Boolean)))
