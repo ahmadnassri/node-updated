@@ -66,7 +66,7 @@ Promise
 
     // JSON
     if (process.args.json) {
-      console.log(JSON.stringify(output.filter(result => !!result)))
+      console.log(JSON.stringify(output.filter(Boolean)))
       process.exit(1)
     }
 
