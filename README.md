@@ -81,13 +81,13 @@ OUTDATED        ^3.5.1 → 6.4.1          npm @ ^3.5.1
 
 ## Options
 
-| Name       | Description                                            |
-| ---------- | -------------------------------------------------------|
-| `--json`   | output JSON results to `stdout`                        |
-| `--silent` | no output on `stderr`                                  |
-| `--color`  | pretty colors!                                         |
-| `--update` | update `package.json` to latest versions               |
-| `--ignore` | pass package names to be ignored, e.g. `--ignore=tap`  |
+| Name       | Description                                                                  |
+| ---------- | -----------------------------------------------------------------------------|
+| `--json`   | output JSON results to `stdout`                                              |
+| `--silent` | no output on `stderr`                                                        |
+| `--color`  | pretty colors!                                                               |
+| `--update` | update `package.json` to latest versions                                     |
+| `--ignore` | specify comma-separated packages to be ignored, e.g. `--ignore=tap,eslint`   |
 
 ## Exit Codes
 
