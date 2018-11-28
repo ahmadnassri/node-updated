@@ -5,7 +5,7 @@ const { writeFileSync } = require('fs')
 const getIgnoreList = () => {
   const arg = process.argv.find(arg => arg.match('--ignore='))
   if (!arg) return []
-  return arg.match(/--ignore=(.*)$/)[1].split(',')
+  return arg.split('=').pop()
 }
 
 // update flag
