@@ -2,12 +2,19 @@
 
 const { writeFileSync } = require('fs')
 
+const getIgnoreList = () => {
+  const arg = process.argv.find(arg => arg.match('--ignore='))
+  if (!arg) return []
+  return arg.split('=').pop()
+}
+
 // update flag
 process.args = {
   color: process.argv.includes('--color'),
   update: process.argv.includes('--update'),
   json: process.argv.includes('--json'),
-  silent: process.argv.includes('--silent')
+  silent: process.argv.includes('--silent'),
+  ignore: getIgnoreList()
 }
 
 const { red, reset } = require('./lib/colors')
@@ -56,7 +63,9 @@ types.forEach(type => {
   if (!pkg[type]) return
 
   // loop & gather
-  Object.entries(pkg[type]).forEach(([name, version]) => dependencies.push({ pkg, type, name, version }))
+  Object.entries(pkg[type]).forEach(([name, version]) => {
+    if (!process.args.ignore.includes(name)) dependencies.push({ pkg, type, name, version })
+  })
 })
 
 // let's do this!

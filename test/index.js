@@ -48,7 +48,7 @@ test('json', assert => {
   assert.equal(result.status, 1)
 })
 
-test('pakcage.json exception', assert => {
+test('package.json exception', assert => {
   assert.plan(2)
 
   const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures') })
@@ -63,5 +63,14 @@ test('spawn exception', assert => {
   const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'invalid') })
 
   assert.match(result.stderr.toString(), /failed to run `npm show`/)
+  assert.equal(result.status, 1)
+})
+
+test('ignore', assert => {
+  assert.plan(2)
+
+  const result = spawnSync('node', args.concat(['--ignore=npm']), { cwd: join(__dirname, 'fixtures', 'outdated') })
+
+  assert.notMatch(result.stderr.toString(), /npm/)
   assert.equal(result.status, 1)
 })
