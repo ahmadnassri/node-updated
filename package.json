@@ -39,6 +39,6 @@
     "test": "npx run-p test:*"
   },
   "devDependencies": {
-    "tap": "^12.1.0"
+    "tap": "^14.6.9"
   }
 }
