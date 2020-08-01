@@ -78,10 +78,11 @@ Promise
       process.exit(1)
     }
 
+    // try to update package.json
     if (process.args.update) {
       writeFileSync(packageFile, JSON.stringify(pkg, null, 2) + '\n', (err) => {
         if (err) throw err
-        console.log('package.json updated')
+        console.log('package.json updated, you should run npm install to refresh your package-lock.json file')
       })
 
       // exit early
