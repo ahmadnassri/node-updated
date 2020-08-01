@@ -1,94 +1,83 @@
 #!/usr/bin/env node
 
-const { writeFileSync } = require('fs')
+// process cli args
+const args = require('./lib/args')
 
-const getIgnoreList = () => {
-  const arg = process.argv.find(arg => arg.match('--ignore='))
-  if (!arg) return []
-  return arg.split('=').pop()
-}
+// load exception handlers
+require('./lib/uncaught')
 
-// update flag
-process.args = {
-  color: process.argv.includes('--color'),
-  update: process.argv.includes('--update'),
-  json: process.argv.includes('--json'),
-  silent: process.argv.includes('--silent'),
-  ignore: getIgnoreList()
-}
-
-const { red, reset } = require('./lib/colors')
-
-// clean errors
-function uncaught (error) {
-  switch (error.issue) {
-    case 'spawn':
-      console.error(red, 'ERROR', reset, 'failed to run `npm show`')
-      break
-
-    /* istanbul ignore next */
-    case 'json':
-      console.error(red, 'ERROR', reset, 'failed to parse `npm show` output')
-      break
-
-    /* istanbul ignore next */
-    default:
-      console.error(red, 'ERROR', reset, error.message || error)
-  }
-
-  process.exit(1)
-}
-
-// catch exceptions (useful for network and system errors)
-process.on('uncaughtException', uncaught)
-process.on('unhandledRejection', uncaught)
-
-// load dependencies
+// modules
 const { join } = require('path')
-const check = require('./lib/check')
+const { promises: { writeFile } } = require('fs')
 
-const packageFile = join(process.cwd(), 'package.json')
+const check = require('./lib/check')
+const parse = require('./lib/parse')
+const Grid = require('./lib/grid')
+const { magenta, cyan, red, green, gray, light } = require('./lib/colors')
+
+// construct full path to package.json
+const filename = join(process.cwd(), 'package.json')
 
 // read package.json
-const pkg = require(packageFile)
+const pkg = require(filename)
 
-// dependencies collection
-const dependencies = []
+// process package.json
+const dependencies = parse(pkg, args.types, args.ignore)
 
-// types of dependencies
-const types = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']
+async function main () {
+  console.time('completed in')
 
-// gather all dependencies
-types.forEach(type => {
-  if (!pkg[type]) return
+  let fail = false
+  const json = []
+  const grid = new Grid()
 
-  // loop & gather
-  Object.entries(pkg[type]).forEach(([name, version]) => {
-    if (!process.args.ignore.includes(name)) dependencies.push({ pkg, type, name, version })
-  })
-})
+  for (const dependency of dependencies) {
+    // check dependency
+    const result = await check(dependency)
 
-// let's do this!
-Promise
-  .all(dependencies.map(check))
-  .then(output => {
-    // JSON
-    if (process.args.json) {
-      console.log(JSON.stringify(output.filter(Boolean)))
-      process.exit(1)
+    // store for later
+    json.push(result)
+
+    // destruct to write output grid
+    let { status, name, type, current, latest } = result
+
+    // send non-zero signal?
+    if (status !== 'unsupported') fail = true
+
+    // should we update the package.json data?
+    if (args.update) {
+      // write to package.json data
+      pkg[type][name] = `^${latest}`
+
+      // reflect in the log
+      status = 'updated'
     }
 
-    // try to update package.json
-    if (process.args.update) {
-      writeFileSync(packageFile, JSON.stringify(pkg, null, 2) + '\n', (err) => {
-        if (err) throw err
-        console.log('package.json updated, you should run npm install to refresh your package-lock.json file')
-      })
+    // convert to upper case
+    status = status.toUpperCase()
 
-      // exit early
-      return process.exit(0)
-    }
+    grid.row([
+      ['UNSUPPORTED', 'NOT-FOUND'].includes(status) ? red(status) : magenta(status),
+      `${name}${light(':')} ${gray(current)}`,
+      latest ? `${cyan(current)} → ${green(latest)}` : null
+    ])
+  }
 
-    // conditional exit code
-    process.exit(output.includes(true))
-  })
+  if (args.json) process.stdout.write(JSON.stringify(json))
+  if (!args.silent && !args.json) grid.render()
+  if (!args.silent) console.timeEnd('completed in')
+
+  if (args.update) {
+    // don't fail!
+    fail = false
+
+    await writeFile(filename, JSON.stringify(pkg, null, 2) + '\n')
+
+    console.log('package.json updated, you should run npm install to refresh your package-lock.json file')
+  }
+
+  process.exit(fail)
+}
+
+// awaiting top-level await!
+main()
