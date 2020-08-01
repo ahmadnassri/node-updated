@@ -28,12 +28,17 @@ async function main () {
   console.time('completed in')
 
   let fail = false
+  let updated = false
+
   const json = []
   const grid = new Grid()
 
   for (const dependency of dependencies) {
     // check dependency
     const result = await check(dependency)
+
+    // exit early
+    if (!result) continue
 
     // store for later
     json.push(result)
@@ -45,12 +50,15 @@ async function main () {
     if (status !== 'not-supported') fail = true
 
     // should we update the package.json data?
-    if (args.update) {
+    if (status === 'outdated' && latest && args.update) {
       // write to package.json data
       pkg[type][name] = `^${latest}`
 
       // reflect in the log
       status = 'updated'
+
+      // flag to update the file
+      updated = true
     }
 
     // convert to upper case
@@ -68,12 +76,19 @@ async function main () {
   if (!args.silent) console.timeEnd('completed in')
 
   if (args.update) {
+    // empty line
+    console.log()
+
     // don't fail!
     fail = false
 
-    await writeFile(filename, JSON.stringify(pkg, null, 2) + '\n')
+    if (updated) {
+      await writeFile(filename, JSON.stringify(pkg, null, 2) + '\n')
 
-    console.log('package.json updated, you should run npm install to refresh your package-lock.json file')
+      console.log(gray('package.json updated'), red('you should run'), 'npm install', red('to refresh your package-lock.json file'))
+    } else {
+      console.log(gray('nothing to update'))
+    }
   }
 
   process.exit(fail)
