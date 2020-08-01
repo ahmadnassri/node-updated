@@ -1,8 +1,27 @@
 # updated
 
-[![License][license-image]][license-url] [![version][npm-image]][npm-url] [![Build Status][circle-image]][circle-url]
+[![license][license-image]][license-url]
+[![version][npm-image]][npm-url]
+[![super linter][super-linter-image]][super-linter-url]
+[![test][test-image]][test-url]
+[![release][release-image]][release-url]
 
-> check for updated package.json dependencies
+[license-url]: LICENSE
+[license-image]: https://img.shields.io/github/license/ahmadnassri/node-updated.svg?logo=circleci
+
+[npm-url]: https://www.npmjs.com/package/updated
+[npm-image]: https://img.shields.io/npm/v/updated.svg?logo=npm
+
+[super-linter-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Asuper-linter
+[super-linter-image]: https://github.com/ahmadnassri/node-updated/workflows/super-linter/badge.svg
+
+[test-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Atest
+[test-image]: https://github.com/ahmadnassri/node-updated/workflows/test/badge.svg
+
+[release-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Arelease
+[release-image]: https://github.com/ahmadnassri/node-updated/workflows/release/badge.svg
+
+> check for updated `package.json` dependencies
 
 ## Motivation
 
@@ -33,7 +52,7 @@ The following types of packages are not supported:
 - `<git repo url>`
 - `<tarball file>`
 - `<tarball url>`
-- `<folder`>
+- `<folder>`
 
 ## Features
 
@@ -69,25 +88,42 @@ Run in your project's folder with `package.json`:
 ```bash
 $ updated
 
-DEPRECATED      ^2.30.1 → 3.6.6         connect @ ^2.30.1
-OUTDATED        ^5.0.15 → 7.1.3         glob @ ^5.0.15
-DEPRECATED      * → 1.2.2               @telusdigital/nightwatch-seo @ *
-OUTDATED        ^3.5.1 → 6.4.1          npm @ ^3.5.1
+DEPRECATED      connect: ^2.30.1                                        ^2.30.1 → 3.7.0
+NOT-SUPPORTED   @ahmadnassri/node-create: ahmadnassri/node-create
+NOT-SUPPORTED   nothingness: github:othiym23/nothingness#master
+OUTDATED        once: ^1.3.1                                            ^1.3.1 → 1.4.0
+DEPRECATED      @telusdigital/nightwatch-seo: *                         * → 1.2.2
+OUTDATED        npm: ^3.5.1                                             ^3.5.1 → 6.14.7
 ```
 
 > _**Tip**: You can check the last exit code by running `echo $?`_  
 >
 > _**Tip**: You don't need to install this package or add it to your dependencies, just run `npx updated`_
 
-## Options
+## CLI Options
 
-| Name       | Description                                                                  |
-| ---------- | -----------------------------------------------------------------------------|
-| `--json`   | output JSON results to `stdout`                                              |
-| `--silent` | no output on `stderr`                                                        |
-| `--color`  | pretty colors!                                                               |
-| `--update` | update `package.json` to latest versions                                     |
-| `--ignore` | specify comma-separated packages to be ignored, e.g. `--ignore=tap,eslint`   |
+> Options are applied using `--[option]=[value]` syntax
+
+| Options  | Default     | Description                                                                                              |
+| -------- | ----------- | -------------------------------------------------------------------------------------------------------- |
+| `json`   | `false`     | output JSON results to `stdout`                                                                          |
+| `silent` | `false`     | do not output report on `stderr`                                                                         |
+| `color`  | `false`     | enable pretty colors!                                                                                    |
+| `update` | `false`     | force update `package.json` to latest versions                                                           |
+| `ignore` | ` `         | specify comma-separated packages to be ignored, _e.g. `--ignore=tap,eslint`_                             |
+| `types`  | _see below_ | specify comma-separated dependency types to be checkd, _e.g. `--types=devDependencies,peerDependencies`_ |
+| `help`   | `N/A`       | display cli help                                                                                         |
+
+### Dependency Types
+
+By default `updated` will check for the following types in your `package.json`
+
+- dependencies
+- devDependencies
+- optionalDependencies
+- peerDependencies
+
+> **Note**: dependency types is an arbitrary string value, your `package.json` can contain additional types beyond the ones listed here, just include them using `--types` and updated will attempt to check their status.
 
 ## Exit Codes
 
@@ -96,19 +132,6 @@ OUTDATED        ^3.5.1 → 6.4.1          npm @ ^3.5.1
 | `0`  | success     |
 | `1`  | failure     |
 
----
-> Author: [Ahmad Nassri](https://www.ahmadnassri.com) &bull; 
-> Github: [@ahmadnassri](https://github.com/ahmadnassri) &bull; 
-> Twitter: [@ahmadnassri](https://twitter.com/ahmadnassri)
-
-[license-url]: LICENSE
-[license-image]: https://img.shields.io/github/license/ahmadnassri/node-updated.svg?style=for-the-badge&logo=circleci
-
-[circle-url]: https://circleci.com/gh/ahmadnassri/node-updated
-[circle-image]: https://img.shields.io/circleci/project/github/ahmadnassri/node-updated/master.svg?style=for-the-badge&logo=circleci
-
-[npm-url]: https://www.npmjs.com/package/updated
-[npm-image]: https://img.shields.io/npm/v/updated.svg?style=for-the-badge&logo=npm
-
 [1]: https://www.npmjs.com/search?q=check%20updates
+
 [2]: https://docs.npmjs.com/cli/outdated
