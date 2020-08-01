@@ -42,7 +42,7 @@ async function main () {
     let { status, name, type, current, latest } = result
 
     // send non-zero signal?
-    if (status !== 'unsupported') fail = true
+    if (status !== 'not-supported') fail = true
 
     // should we update the package.json data?
     if (args.update) {
@@ -57,7 +57,7 @@ async function main () {
     status = status.toUpperCase()
 
     grid.row([
-      ['UNSUPPORTED', 'NOT-FOUND'].includes(status) ? red(status) : magenta(status),
+      ['NOT-SUPPORTED', 'NOT-FOUND'].includes(status) ? red(status) : magenta(status),
       `${name}${light(':')} ${gray(current)}`,
       latest ? `${cyan(current)} → ${green(latest)}` : null
     ])
