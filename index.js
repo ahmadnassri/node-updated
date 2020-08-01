@@ -83,6 +83,9 @@ Promise
         if (err) throw err
         console.log('package.json updated')
       })
+
+      // exit early
+      return process.exit(0)
     }
 
     // conditional exit code

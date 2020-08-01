@@ -1,8 +1,9 @@
-const { test } = require('tap')
 const { join } = require('path')
+const { readFileSync } = require('fs')
 const { spawnSync } = require('child_process')
+const { test } = require('tap')
 
-const args = [ join(__dirname, '..', 'index.js') ]
+const args = [join(__dirname, '..', 'index.js')]
 
 test('success', assert => {
   assert.plan(1)
@@ -73,4 +74,25 @@ test('ignore', assert => {
 
   assert.notMatch(result.stderr.toString(), /npm/)
   assert.equal(result.status, 1)
+})
+
+test('update', assert => {
+  assert.plan(3)
+
+  // prep fixture
+  spawnSync('cp', ['-r', 'outdated', 'updated'], { cwd: join(__dirname, 'fixtures') })
+
+  const before = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'updated', 'package.json')))
+
+  // run
+  const result = spawnSync('node', args.concat(['--update']), { cwd: join(__dirname, 'fixtures', 'updated') })
+
+  const after = JSON.parse(readFileSync(join(__dirname, 'fixtures', 'updated', 'package.json')))
+
+  // clean-up fixture
+  spawnSync('rm', ['-rf', 'updated'], { cwd: join(__dirname, 'fixtures') })
+
+  assert.notMatch(before, after)
+  assert.equal(after.devDependencies.once, '^1.4.0')
+  assert.equal(result.status, 0)
 })
