@@ -20,7 +20,7 @@
     "outdated"
   ],
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "files": [
     "lib",
@@ -30,15 +30,10 @@
     "url": "https://github.com/ahmadnassri/node-updated/issues"
   },
   "scripts": {
-    "lint:ec": "npx editorconfig-checker .",
-    "lint:js": "npx eslint .",
-    "lint:md": "npx remark --quiet --frail .",
-    "lint": "npx run-p lint:*",
-    "open:coverage": "opener coverage/lcov-report/index.html",
-    "test:tap": "tap test --coverage-report=lcov --no-browser",
-    "test": "npx run-p test:*"
+    "test": "tap test --no-coverage",
+    "test:100": "tap test --100 --coverage-report=lcov --no-browser"
   },
   "devDependencies": {
-    "tap": "^12.1.0"
+    "tap": "^14.10.8"
   }
 }
