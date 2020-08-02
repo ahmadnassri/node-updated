@@ -22,7 +22,7 @@ const filename = join(process.cwd(), 'package.json')
 const pkg = require(filename)
 
 // process package.json
-const dependencies = parse(pkg, args.types, args.ignore)
+const dependencies = parse(pkg, args)
 
 async function main () {
   console.time('completed in')
