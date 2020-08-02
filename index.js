@@ -77,7 +77,7 @@ async function main () {
 
   if (args.update) {
     // empty line
-    console.log()
+    console.error()
 
     // don't fail!
     fail = false
@@ -85,9 +85,9 @@ async function main () {
     if (updated) {
       await writeFile(filename, JSON.stringify(pkg, null, 2) + '\n')
 
-      console.log(gray('package.json updated'), red('you should run'), 'npm install', red('to refresh your package-lock.json file'))
+      console.error(gray('package.json updated'), red('you should run'), 'npm install', red('to refresh your package-lock.json file'))
     } else {
-      console.log(gray('nothing to update'))
+      console.error(gray('nothing to update'))
     }
   }
 
