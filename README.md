@@ -1,30 +1,25 @@
 # updated
 
-[![license][license-image]][license-url]
-[![version][npm-image]][npm-url]
-[![super linter][super-linter-image]][super-linter-url]
-[![test][test-image]][test-url]
-[![release][release-image]][release-url]
+[![license][license-img]][license-url]
+[![version][npm-img]][npm-url]
+[![super linter][super-linter-img]][super-linter-url]
+[![test][test-img]][test-url]
+[![release][release-img]][release-url]
 
 [license-url]: LICENSE
-
-[license-image]: https://img.shields.io/github/license/ahmadnassri/node-updated.svg?logo=circleci
+[license-img]: https://badgen.net/github/license/ahmadnassri/node-updated
 
 [npm-url]: https://www.npmjs.com/package/updated
-
-[npm-image]: https://img.shields.io/npm/v/updated.svg?logo=npm
+[npm-img]: https://badgen.net/npm/v/updated
 
 [super-linter-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Asuper-linter
-
-[super-linter-image]: https://github.com/ahmadnassri/node-updated/workflows/super-linter/badge.svg
+[super-linter-img]: https://github.com/ahmadnassri/node-updated/workflows/super-linter/badge.svg
 
 [test-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Atest
-
-[test-image]: https://github.com/ahmadnassri/node-updated/workflows/test/badge.svg
+[test-img]: https://github.com/ahmadnassri/node-updated/workflows/test/badge.svg
 
 [release-url]: https://github.com/ahmadnassri/node-updated/actions?query=workflow%3Arelease
-
-[release-image]: https://github.com/ahmadnassri/node-updated/workflows/release/badge.svg
+[release-img]: https://github.com/ahmadnassri/node-updated/workflows/release/badge.svg 
 
 > check for updated `package.json` dependencies
 
