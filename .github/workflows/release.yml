@@ -15,7 +15,6 @@ jobs:
 
       # run checks
       - run: npm audit --audit-level=moderate
-      - run: npx updated --color
 
   test:
     needs: dependencies
@@ -51,9 +50,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # release
       - name: semantic-release
-        uses: docker://ahmadnassri/action-semantic-release:v1
+        uses: ahmadnassri/action-semantic-release@v1
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
