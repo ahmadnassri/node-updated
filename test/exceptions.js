@@ -1,5 +1,6 @@
-const { join } = require('path')
-const { spawnSync } = require('child_process')
+const { join } = require('node:path')
+const { spawnSync } = require('node:child_process')
+
 const { test } = require('tap')
 
 const args = [join(__dirname, '..', 'index.js')]
@@ -18,6 +19,6 @@ test('spawn exception', assert => {
 
   const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'invalid') })
 
-  assert.match(result.stderr.toString(), /failed to run `npm show`/)
+  assert.match(result.stderr.toString(), /failed to run "npm show/)
   assert.equal(result.status, 1)
 })

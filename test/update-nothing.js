@@ -9,17 +9,17 @@ test('update', async assert => {
   assert.plan(3)
 
   // prep fixture
-  spawnSync('cp', ['-r', 'outdated', 'no-update'], { cwd: join(__dirname, 'fixtures') })
+  spawnSync('cp', ['-r', 'outdated', '/tmp/no-update'], { cwd: join(__dirname, 'fixtures') })
 
-  const before = JSON.parse(await readFile(join(__dirname, 'fixtures', 'no-update', 'package.json')))
+  const before = JSON.parse(await readFile(join('/tmp/no-update', 'package.json')))
 
   // run
-  const result = spawnSync('node', args, { cwd: join(__dirname, 'fixtures', 'no-update') })
+  const result = spawnSync('node', args, { cwd: join('/tmp/no-update') })
 
-  const after = JSON.parse(await readFile(join(__dirname, 'fixtures', 'no-update', 'package.json')))
+  const after = JSON.parse(await readFile(join('/tmp/no-update', 'package.json')))
 
   // clean-up fixture
-  spawnSync('rm', ['-rf', 'no-update'], { cwd: join(__dirname, 'fixtures') })
+  spawnSync('rm', ['-rf', '/tmp/no-update'])
 
   assert.match(before, after)
   assert.equal(after.devDependencies.once, '^1.3.1')

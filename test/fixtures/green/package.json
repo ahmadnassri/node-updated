@@ -2,7 +2,7 @@
   "name": "green",
   "version": "0.0.0",
   "dependencies": {
-    "ahmad": "2.0.0",
-    "@ahmadnassri/node-create": "ahmadnassri/node-create"
+    "ahmad": "2.0.8",
+    "@ahmadnassri/a-github-package": "ahmadnassri/my-repo"
   }
 }

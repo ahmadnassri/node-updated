@@ -1,5 +1,6 @@
-const { join } = require('path')
-const { spawnSync } = require('child_process')
+const { join } = require('node:path')
+const { spawnSync } = require('node:child_process')
+
 const { test } = require('tap')
 
 const args = [join(__dirname, '..', 'index.js')]
