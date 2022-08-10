@@ -1,7 +1,6 @@
 # ----------------------------------------------- #
 # Note: this file originates in template-node-lib #
 # ----------------------------------------------- #
-
 *.log
 .nyc_output
 coverage
