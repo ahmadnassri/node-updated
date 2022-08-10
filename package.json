@@ -1,16 +1,21 @@
 {
-  "private": false,
-  "version": "1.3.0",
+  "version": "0.0.0-semantically-released",
   "name": "updated",
   "description": "check for updated package.json dependencies",
   "author": "Ahmad Nassri <ahmad@ahmadnassri.com> (https://www.ahmadnassri.com)",
-  "homepage": "https://www.ahmadnassri.com",
+  "homepage": "https://github.com/ahmadnassri/node-updated",
   "repository": {
     "type": "git",
     "url": "https://github.com/ahmadnassri/node-updated.git"
   },
+  "bugs": {
+    "url": "https://github.com/ahmadnassri/node-updated/issues"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/ahmadnassri"
+  },
   "license": "MIT",
-  "bin": "index.js",
   "keywords": [
     "node",
     "package",
@@ -20,20 +25,23 @@
     "outdated"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   },
   "files": [
     "lib",
     "index.js"
   ],
-  "bugs": {
-    "url": "https://github.com/ahmadnassri/node-updated/issues"
-  },
+  "bin": "index.js",
   "scripts": {
     "test": "tap test --no-coverage",
-    "test:100": "tap test --100 --coverage-report=lcov --no-browser"
+    "test:watch": "tap test --watch",
+    "test:ci": "tap test --100",
+    "test:report": "opener coverage/lcov-report/index.html"
+  },
+  "dependencies": {
+    "semver": "^7.3.7"
   },
   "devDependencies": {
-    "tap": "^14.10.8"
+    "tap": "^16.3.0"
   }
 }

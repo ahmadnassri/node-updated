@@ -1,0 +1,8 @@
+version: 2.0
+
+id: node-updated
+
+about:
+  title: Updated
+  description: check for updated package.json dependencies
+  repository: ahmadnassri/node-updated

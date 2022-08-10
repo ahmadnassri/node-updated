@@ -2,7 +2,10 @@
 # Note: this file originates in template-node-lib #
 # ----------------------------------------------- #
 
-.nyc_output
-coverage
-node_modules
-dist
+ts: false
+jsx: false
+flow: false
+coverage: true
+browser: false
+color: true
+coverage-report: html
