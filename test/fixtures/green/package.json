@@ -2,7 +2,7 @@
   "name": "green",
   "version": "0.0.0",
   "dependencies": {
-    "ahmad": "2.0.8",
+    "ahmad": "2.1.0",
     "@ahmadnassri/a-github-package": "ahmadnassri/my-repo"
   }
 }
