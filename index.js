@@ -91,7 +91,7 @@ async function main () {
     }
   }
 
-  process.exit(fail)
+  process.exit(Number(fail))
 }
 
 // awaiting top-level await!
