@@ -79,16 +79,17 @@ OUTDATED        npm: ^3.5.1                                             ^3.5.1 â
 
 > Options are applied using `--[option]=[value]` syntax
 
-| Options    | Default     | Description                                                                                  |
-| ---------- | ----------- | -------------------------------------------------------------------------------------------- |
-| `ignore`   | ` `         | comma-separated packages to be ignored, _e.g. `--ignore=tap,eslint`_                         |
-| `types`    | _see below_ | comma-separated dependency types to check, _e.g. `--types=devDependencies,peerDependencies`_ |
-| `scopes`   | `all`       | comma-separated list of package `@scopes` to check, default checks all                       |
-| `update`   | `false`     | force update `package.json` to latest versions                                               |
-| `json`     | `false`     | output JSON results to `stdout`                                                              |
-| `silent`   | `false`     | do not output report on `stderr`                                                             |
-| `no-color` | `false`     | disable color output                                                                         |
-| `help`     | `N/A`       | display cli help                                                                             |
+| Options       | Default     | Description                                                                                  |
+| ------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| `workspaces`  | `false`     | process workspaces                                                                           |
+| `ignore`      | ` `         | comma-separated packages to be ignored, _e.g. `--ignore=tap,eslint`_                         |
+| `types`       | _see below_ | comma-separated dependency types to check, _e.g. `--types=devDependencies,peerDependencies`_ |
+| `scopes`      | `all`       | comma-separated list of package `@scopes` to check, default checks all                       |
+| `update`      | `false`     | force update `package.json` to latest versions                                               |
+| `json`        | `false`     | output JSON results to `stdout`                                                              |
+| `silent`      | `false`     | do not output report on `stderr`                                                             |
+| `no-color`    | `false`     | disable color output                                                                         |
+| `help`        | `N/A`       | display cli help                                                                             |
 
 ### Dependency Types
 
