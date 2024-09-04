@@ -34,15 +34,10 @@
   ],
   "bin": "index.js",
   "scripts": {
-    "test": "node --test",
-    "test:watch": "tap test --watch",
-    "test:ci": "tap test --100",
-    "test:report": "opener coverage/lcov-report/index.html"
+    "test": "node --test --test-reporter=spec test/*.js",
+    "test:ci": "npm run test"
   },
   "dependencies": {
     "semver": "^7.3.7"
-  },
-  "devDependencies": {
-    "tap": "^16.3.0"
   }
 }
