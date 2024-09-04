@@ -15,6 +15,7 @@
     "type": "individual",
     "url": "https://github.com/sponsors/ahmadnassri"
   },
+  "type": "module",
   "license": "MIT",
   "keywords": [
     "node",
@@ -33,7 +34,7 @@
   ],
   "bin": "index.js",
   "scripts": {
-    "test": "tap test --no-coverage",
+    "test": "node --test",
     "test:watch": "tap test --watch",
     "test:ci": "tap test --100",
     "test:report": "opener coverage/lcov-report/index.html"

@@ -1,53 +1,63 @@
 #!/usr/bin/env node
 
+import module from 'node:module'
+
 // process cli args
-const args = require('./lib/args')
+import args from './lib/args.js'
 
 // load exception handlers
-require('./lib/uncaught')
+import './lib/uncaught.js'
 
 // modules
-const { join } = require('path')
-const { promises: { writeFile } } = require('fs')
+import { join } from 'path'
+import { writeFile } from 'fs/promises'
 
-const check = require('./lib/check')
-const parse = require('./lib/parse')
-const Grid = require('./lib/grid')
-const { magenta, cyan, red, green, gray, light } = require('./lib/colors')
+import check from './lib/check.js'
+import parse from './lib/parse.js'
+import Grid from './lib/grid.js'
+import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
+
+const require = module.createRequire(import.meta.url)
+
+console.time('completed in')
 
 // construct full path to package.json
 const filename = join(process.cwd(), 'package.json')
 
-// read package.json
-const pkg = require(filename)
+// check for workspaces in root package.json
+const workspaces = require(filename).workspaces || []
 
-// process package.json
-const dependencies = parse(pkg, args)
+async function main (filename, workspace) {
+  // read package.json
+  const pkg = require(filename)
 
-async function main () {
-  console.time('completed in')
+  // process package.json
+  const dependencies = parse(pkg, args)
 
-  let fail = false
+  let exitCode = false
   let updated = false
 
-  const json = []
+  const data = []
   const grid = new Grid()
 
   for (const dependency of dependencies) {
     // check dependency
-    const result = await check(dependency)
+    let result = await check(dependency)
 
     // exit early
     if (!result) continue
 
+    // specify which workspace we are in
+    if (workspace) result = { ...result, workspace }
+
     // store for later
-    json.push(result)
+    data.push(result)
 
     // destruct to write output grid
     let { status, name, type, current, latest } = result
 
     // send non-zero signal?
-    if (status !== 'not-supported') fail = true
+    if (status !== 'not-supported') exitCode = true
 
     // should we update the package.json data?
     if (status === 'outdated' && latest && args.update) {
@@ -71,16 +81,14 @@ async function main () {
     ])
   }
 
-  if (args.json) process.stdout.write(JSON.stringify(json))
   if (!args.silent && !args.json) grid.render()
-  if (!args.silent) console.timeEnd('completed in')
 
   if (args.update) {
     // empty line
     console.error()
 
     // don't fail!
-    fail = false
+    exitCode = false
 
     if (updated) {
       await writeFile(filename, JSON.stringify(pkg, null, 2) + '\n')
@@ -91,8 +99,35 @@ async function main () {
     }
   }
 
-  process.exit(Number(fail))
+  // convert boolean to number
+  return { exitCode, data }
 }
 
-// awaiting top-level await!
-main()
+const exitCodes = []
+const json = []
+
+if (args.workspaces) {
+  for (const workspace of ['.', ...workspaces]) {
+    if (!args.json) console.log('processing workspace:', workspace === '.' ? 'root' : workspace)
+
+    // construct full path to package.json
+    const filename = join(process.cwd(), workspace, 'package.json')
+
+    // process dependencies
+    const { exitCode, data } = await main(filename, workspace)
+
+    json.push(...data)
+    exitCodes.push(Number(exitCode))
+  }
+} else {
+  const { exitCode, data } = await main(filename)
+
+  json.push(...data)
+  exitCodes.push(Number(exitCode))
+}
+
+if (args.json) process.stdout.write(JSON.stringify(json))
+
+if (!args.silent) console.timeEnd('completed in')
+
+process.exit(Math.max(...exitCodes))
