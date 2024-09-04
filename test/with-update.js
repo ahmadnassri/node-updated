@@ -3,15 +3,22 @@ import { join } from 'path'
 import { readFile, cp, rm, mkdtemp } from 'fs/promises'
 import { spawnSync } from 'child_process'
 import { describe, test, beforeEach, afterEach } from 'node:test'
+import assert from 'node:assert'
 
-const __dirname = import.meta.dirname
+// node v18 support
+import { dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+// node v20+ support
+// const __dirname = import.meta.dirname
 
 const fsOpts = { recursive: true }
 const fixtures = join(__dirname, 'fixtures')
 const cmd = join(__dirname, '..', 'index.js')
 
 let cwd
-
 
 describe('with --update', () => {
   beforeEach(async () => {
@@ -21,7 +28,7 @@ describe('with --update', () => {
   afterEach(() => rm(cwd, fsOpts))
 
   test('updates package.json', async t => {
-    t.plan(3)
+    // t.plan(3)
 
     // prep fixture
     await cp(join(fixtures, 'outdated'), cwd, fsOpts)
@@ -35,13 +42,13 @@ describe('with --update', () => {
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
 
-    t.assert.notEqual(before, after)
-    t.assert.equal(after.devDependencies.once, '^1.4.0')
-    t.assert.equal(result.status, 0)
+    assert.notEqual(before, after)
+    assert.equal(after.devDependencies.once, '^1.4.0')
+    assert.equal(result.status, 0)
   })
 
   test('updates nothing with empty types', async t => {
-    t.plan(3)
+    // t.plan(3)
 
     // prep fixture
     await cp(join(fixtures, 'outdated'), cwd, fsOpts)
@@ -55,8 +62,8 @@ describe('with --update', () => {
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
 
-    t.assert.deepEqual(before, after)
-    t.assert.equal(after.devDependencies.once, '^1.3.1')
-    t.assert.equal(result.status, 0)
+    assert.deepEqual(before, after)
+    assert.equal(after.devDependencies.once, '^1.3.1')
+    assert.equal(result.status, 0)
   })
 })
