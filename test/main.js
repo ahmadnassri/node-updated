@@ -104,7 +104,8 @@ describe('exceptions', () => {
 
     const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'invalid') })
 
-    assert.match(stderr.toString(), /failed to run "npm show/)
+    // npm-registry-fetch validates package names and returns NOT-FOUND for invalid names
+    assert.match(stderr.toString(), /NOT-FOUND/)
     assert.equal(status, 1)
   })
 })
