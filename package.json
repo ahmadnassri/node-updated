@@ -38,6 +38,7 @@
     "test:ci": "npm run test"
   },
   "dependencies": {
+    "npm-registry-fetch": "^17.0.0",
     "semver": "^7.3.7"
   }
 }
