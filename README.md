@@ -10,20 +10,22 @@ check for updated package.json dependencies
 
 While there are [many package dependency checking tools][], they all come with some gotchas:
 
-- **cli dependencies**:  
-  While having dependencies for a CLI package is not an issue in itself, the dependencies themselves often come with vulnerabilities, and will inevitably fall behind as maintainers are not able to keep up with upstream changes.
+- **additional dependencies**:
+  While having dependencies for a CLI package is not uncommon, the dependencies themselves can fall behind as maintainers struggle to keep up with upstream changes.
 
-- **npm API dependency**:  
-  This means figuring out which `.npmrc` to parse, how to parse it meaningfully, essentially repeating `npm` cli's own logic, this gets complicated when your `.npmrc` file mixes multiple registries and scopes!
+- **exit codes & standard streams**:
+  some solutions do not use proper exit codes *(e.g. `0` for success `1` for failure)* and rely on `console.log` for all outputs instead of properly streaming results to `stdout` and `stderr`. This makes them incompatible for usage within a CI process.
 
-- **exit codes & standard streams**:  
-  some of the solutions do not use proper exit codes *(e.g. `0` for success `1` for failure)* and rely on `console.log` for all outputs instead of properly streaming results to `stdout` and `stderr`. This makes them incompatible for usage within a CI process.
+- **[`npm outdated`][]**
+  `npm`'s `outdated` command seems to attempt to address some of the basics, however, it only works for production `dependencies` *(and `devDependencies` if you add the hidden `-D` flag!)* but not both at the same time!
+  `optionalDependencies` and `peerDependencies` are not included.
 
-- **[`npm outdated`][]**  
-  `npm`'s `outdated` command seems to attempt to address some of the basics, however, it seems to only work for production `dependencies` *(and `devDependencies` if you add the hidden `-D` flag!)* and not at the same time!
-  `optionalDependencies`, `peerDependencies` are not included.
+This utility addresses these issues **by using the npm registry API directly via `npm-registry-fetch`**, which:
 
-This utility opposes those two key issues **by using the `npm` cli** directly to inspect each dependency in your `package.json`!
+- Works without requiring npm CLI to be installed
+- Properly handles `.npmrc` configuration, authentication, and custom registries
+- Uses the same library that npm CLI uses internally for registry access
+- Maintains proper exit codes and standard streams for CI compatibility
 
 **Hopefully, `npm outdated` will evolve and make this tool irrelevant!**
 
@@ -42,20 +44,23 @@ The following types of packages are not supported:
 - **Asynchronous**
   runs each package check asynchronously, with immediate feedback to `stdout`
 
-- **ZERO dependencies**  
-  keeping this package lean for use with CI.
+- **Minimal dependencies**
+  uses `npm-registry-fetch` (the official npm registry client) and `semver` to keep the package lean for CI use.
 
-- **uses `npm`**  
-  uses the `npm show` cli command directly, which allows matching your actual `npm` environment and project config.
+- **Works without npm CLI**
+  uses the npm registry API directly, which means it works in any Node.js environment without requiring npm CLI to be installed.
 
-- **CI friendly**  
+- **Proper authentication**
+  automatically reads `.npmrc` configuration for authentication tokens and custom registries, supporting private packages and scoped registries.
+
+- **CI friendly**
   through proper usage of standard streams *(`stdout`, `stderr`)* and exit codes.
 
 - **configurable**
   use simple [arguments][] to control behaviour.
 
-- **compares against `package.json`**  
-  `updated` will **ONLY** look at `package.json` and query npm with the **same version ranges** you define, to better simulate what `npm install` will produce. and avoid pointless errors.
+- **compares against `package.json`**
+  `updated` will **ONLY** look at `package.json` and query the registry with the **same version ranges** you define, to better simulate what `npm install` will produce and avoid pointless errors.
 
   > ***e.g.** `updated@^1.0.0` is still valid if the latest is `updated@^1.0.1` because `npm install` will grab the latter.*
 
