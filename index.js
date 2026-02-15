@@ -18,37 +18,6 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 // Ecosystem support
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
 
-// Ecosystem registry
-const ecosystems = {
-  npm: NpmEcosystem
-}
-
-/**
- * Detect available ecosystems based on manifest files
- * @returns {Array<string>} Array of ecosystem names
- */
-function detectEcosystems () {
-  const detected = []
-
-  for (const [name, EcosystemClass] of Object.entries(ecosystems)) {
-    const manifestFiles = EcosystemClass.manifestFiles
-
-    for (const manifestFile of manifestFiles) {
-      try {
-        const fullPath = join(process.cwd(), manifestFile)
-        require.resolve(fullPath)
-        if (!detected.includes(name)) {
-          detected.push(name)
-        }
-      } catch {
-        // Manifest file doesn't exist
-      }
-    }
-  }
-
-  return detected
-}
-
 const require = module.createRequire(import.meta.url)
 
 console.time('completed in')
@@ -69,7 +38,13 @@ async function main (filename, workspace) {
   const ecosystem = new NpmEcosystem()
 
   // Process package.json using ecosystem
-  const dependencies = await ecosystem.parse(cliArguments, filename)
+  let dependencies
+  try {
+    dependencies = await ecosystem.parse(cliArguments, filename)
+  } catch (error) {
+    console.error(red('Error parsing package.json:'), error.message)
+    return { exitCode: true, data: [] }
+  }
 
   // read package.json (still needed for update logic)
   const packageJson = require(filename)
@@ -115,7 +90,7 @@ async function main (filename, workspace) {
     status = status.toUpperCase()
 
     grid.row([
-      ['NOT-SUPPORTED', 'NOT-FOUND'].includes(status) ? red(status) : magenta(status),
+      ['NOT-SUPPORTED', 'NOT-FOUND', 'ERROR'].includes(status) ? red(status) : magenta(status),
       `${name}${light(':')} ${gray(current)}`,
       latest ? `${cyan(current)} → ${green(latest)}` : null
     ])
