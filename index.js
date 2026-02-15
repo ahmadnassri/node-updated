@@ -17,6 +17,7 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 
 // Ecosystem support
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
+import DockerEcosystem from './lib/ecosystems/docker/index.js'
 
 const require = module.createRequire(import.meta.url)
 
@@ -121,6 +122,7 @@ async function main (filename, workspace) {
 const exitCodes = []
 const json = []
 
+// Check npm packages
 if (cliArguments.workspaces) {
   for (const workspace of ['.', ...workspaces]) {
     if (!cliArguments.json) console.log('processing workspace:', workspace === '.' ? 'root' : workspace)
@@ -139,6 +141,59 @@ if (cliArguments.workspaces) {
 
   json.push(...data)
   exitCodes.push(Number(exitCode))
+}
+
+// Check Docker images from compose files
+try {
+  const dockerEcosystem = new DockerEcosystem()
+  const composeFiles = ['compose.yml', 'docker-compose.yml']
+
+  for (const composeFile of composeFiles) {
+    const composePath = join(process.cwd(), composeFile)
+
+    try {
+      const dependencies = await dockerEcosystem.parse(cliArguments, composePath)
+
+      if (dependencies.length === 0) continue
+
+      const grid = new Grid()
+      let exitCode = false
+
+      for (const dependency of dependencies) {
+        const result = await dockerEcosystem.check(dependency)
+
+        if (!result) continue
+
+        json.push(result)
+
+        const { status, name, current, latest } = result
+
+        if (status !== 'not-supported') exitCode = true
+
+        const statusUpper = status.toUpperCase()
+
+        grid.row([
+          ['NOT-SUPPORTED', 'NOT-FOUND', 'ERROR'].includes(statusUpper) ? red(statusUpper) : magenta(statusUpper),
+          `${name}${light(':')} ${gray(current)}`,
+          latest ? `${cyan(current)} → ${green(latest)}` : null
+        ])
+      }
+
+      if (!cliArguments.silent && !cliArguments.json && grid.rows.length > 0) {
+        console.log() // Empty line before Docker results
+        console.log(gray(`=== ${composeFile} ===`))
+        grid.render()
+      }
+
+      exitCodes.push(Number(exitCode))
+      break // Only process first found compose file
+    } catch (error) {
+      // Compose file doesn't exist or can't be read, try next
+      continue
+    }
+  }
+} catch (error) {
+  // Docker ecosystem not available or error, skip silently
 }
 
 if (cliArguments.json) process.stdout.write(JSON.stringify(json))
