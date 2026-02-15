@@ -34,4 +34,40 @@ describe('Docker Image Parser', () => {
     const result = parseImage('nginx')
     assert.equal(result.tag, 'latest')
   })
+
+  test('should handle digest-based references', () => {
+    const result = parseImage('nginx@sha256:abc123')
+    assert.equal(result.registry, 'docker.io')
+    assert.equal(result.name, 'library/nginx')
+    assert.equal(result.tag, 'sha256:abc123')
+  })
+
+  test('should handle digest with custom registry', () => {
+    const result = parseImage('ghcr.io/owner/app@sha256:def456')
+    assert.equal(result.registry, 'ghcr.io')
+    assert.equal(result.name, 'owner/app')
+    assert.equal(result.tag, 'sha256:def456')
+  })
+
+  test('should reject empty input', () => {
+    assert.throws(() => parseImage(''), /Invalid image reference/)
+  })
+
+  test('should reject null input', () => {
+    assert.throws(() => parseImage(null), /Invalid image reference/)
+  })
+
+  test('should handle localhost registry', () => {
+    const result = parseImage('localhost:5000/app:v1')
+    assert.equal(result.registry, 'localhost:5000')
+    assert.equal(result.name, 'app')
+    assert.equal(result.tag, 'v1')
+  })
+
+  test('should default to latest for custom registry without tag', () => {
+    const result = parseImage('ghcr.io/owner/app')
+    assert.equal(result.registry, 'ghcr.io')
+    assert.equal(result.name, 'owner/app')
+    assert.equal(result.tag, 'latest')
+  })
 })
