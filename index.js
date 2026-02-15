@@ -17,7 +17,6 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 
 // Ecosystem support
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
-import parse from './lib/ecosystems/npm/parser.js'
 
 // Ecosystem registry
 const ecosystems = {
@@ -66,20 +65,20 @@ const workspaces = require(filename).workspaces || []
  * @param workspace
  */
 async function main (filename, workspace) {
-  // read package.json
-  const packageJson = require(filename)
+  // Create ecosystem instance
+  const ecosystem = new NpmEcosystem()
 
-  // process package.json
-  const dependencies = parse(packageJson, cliArguments)
+  // Process package.json using ecosystem
+  const dependencies = await ecosystem.parse(cliArguments, filename)
+
+  // read package.json (still needed for update logic)
+  const packageJson = require(filename)
 
   let exitCode = false
   let updated = false
 
   const data = []
   const grid = new Grid()
-
-  // Create ecosystem instance
-  const ecosystem = new NpmEcosystem()
 
   for (const dependency of dependencies) {
     // check dependency
