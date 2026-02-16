@@ -21,7 +21,7 @@ describe('Docker Ecosystem', () => {
 
     // Should detect old version as outdated or return not-supported for variant issues
     expect(['outdated', 'not-supported', 'not-found'].includes(result?.status)).toBeTruthy()
-  })
+  }, 10000) // Network call may be slow, allow 10 seconds
 
   test('should handle not-supported tags', async () => {
     const ecosystem = new DockerEcosystem()
