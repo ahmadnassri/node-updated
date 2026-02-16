@@ -40,8 +40,9 @@ console.time('completed in')
 // construct full path to package.json
 const filename = join(process.cwd(), 'package.json')
 
-// check for workspaces in root package.json
-const rootPackage = await Bun.file(filename).json()
+// check for workspaces in root package.json (if it exists)
+const hasPackageJson = await Bun.file(filename).exists()
+const rootPackage = hasPackageJson ? await Bun.file(filename).json() : {}
 const workspaces = rootPackage.workspaces || []
 
 /**
@@ -187,25 +188,27 @@ async function main (filename, workspace) {
 const exitCodes = []
 const json = []
 
-// Check npm packages
-if (cliArguments.workspaces) {
-  for (const workspace of ['.', ...workspaces]) {
-    if (!cliArguments.json) console.log('processing workspace:', workspace === '.' ? 'root' : workspace)
+// Check npm packages (only if package.json exists)
+if (hasPackageJson) {
+  if (cliArguments.workspaces) {
+    for (const workspace of ['.', ...workspaces]) {
+      if (!cliArguments.json) console.log('processing workspace:', workspace === '.' ? 'root' : workspace)
 
-    // construct full path to package.json
-    const filename = join(process.cwd(), workspace, 'package.json')
+      // construct full path to package.json
+      const filename = join(process.cwd(), workspace, 'package.json')
 
-    // process dependencies
-    const { exitCode, data } = await main(filename, workspace)
+      // process dependencies
+      const { exitCode, data } = await main(filename, workspace)
+
+      json.push(...data)
+      exitCodes.push(Number(exitCode))
+    }
+  } else {
+    const { exitCode, data } = await main(filename)
 
     json.push(...data)
     exitCodes.push(Number(exitCode))
   }
-} else {
-  const { exitCode, data } = await main(filename)
-
-  json.push(...data)
-  exitCodes.push(Number(exitCode))
 }
 
 // Check Docker images from compose files
@@ -267,6 +270,13 @@ try {
   }
 } catch (error) {
   // Docker ecosystem not available or error, skip silently
+}
+
+// Check if we found any ecosystems to process
+if (exitCodes.length === 0) {
+  console.error(red('No package.json or compose files found in current directory'))
+  console.error('Run this command from a directory containing package.json and/or compose.yml')
+  process.exit(1)
 }
 
 if (cliArguments.json) process.stdout.write(JSON.stringify(json))

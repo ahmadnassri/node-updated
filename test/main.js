@@ -80,7 +80,7 @@ describe('exceptions', () => {
   test('package.json exception', () => {
     const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: fixtures })
 
-    expect(stderr.toString()).toMatch(/ENOENT|Cannot find module/)
+    expect(stderr.toString()).toMatch(/No package\.json or compose files found/)
     expect(status).toBe(1)
   })
 
