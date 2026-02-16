@@ -106,6 +106,8 @@ updated
 
 ## Usage
 
+### Check for outdated packages
+
 Run in your project's folder with `package.json`:
 
 ``` bash
@@ -118,6 +120,58 @@ OUTDATED        once: ^1.3.1                                            ^1.3.1 �
 DEPRECATED      @telusdigital/nightwatch-seo: *                         * → 1.2.2
 OUTDATED        npm: ^3.5.1                                             ^3.5.1 → 6.14.7
 ```
+
+### Interactive mode (new in v4.0.0)
+
+Use `--update` to interactively select packages to update:
+
+``` bash
+$ updated --update
+
+? Which ecosystem would you like to update? › npm
+? Where would you like to update packages? ›
+  ◻ root
+  ◻ packages/api
+  ◻ packages/web
+
+? Select packages to update: ›
+  ◉ once: ^1.3.1 → 1.4.0
+  ◻ npm: ^3.5.1 → 6.14.7
+  ◻ semver: ^7.3.7 → 7.6.3
+
+Preview of changes:
+  1 package selected for update
+
+  root:
+    once: ^1.3.1 → 1.4.0
+
+? Continue with update? › (Use arrow keys)
+  › Yes, update package.json files
+    No, go back to package selection
+    Cancel
+```
+
+The interactive mode allows you to:
+- Filter by ecosystem (npm, docker, github-actions)
+- Filter by workspace/location
+- Select specific packages to update
+- Preview changes before applying
+- Navigate back to change selections
+
+### Non-interactive auto-update
+
+Use `--update --all` to automatically update all outdated packages without prompting:
+
+``` bash
+$ updated --update --all
+
+Updated 3 packages:
+  once: ^1.3.1 → 1.4.0
+  npm: ^3.5.1 → 6.14.7
+  semver: ^7.3.7 → 7.6.3
+```
+
+This is useful for automated scripts and CI/CD pipelines.
 
 > ***Tip**: You can check the last exit code by running `echo $?`*
 >
@@ -133,9 +187,10 @@ OUTDATED        npm: ^3.5.1                                             ^3.5.1 �
 | `ignore`     | ` `         | comma-separated packages to be ignored, *e.g. `--ignore=tap,eslint`*                         |
 | `types`      | *see below* | comma-separated dependency types to check, *e.g. `--types=devDependencies,peerDependencies`* |
 | `scopes`     | `all`       | comma-separated list of package `@scopes` to check, default checks all                       |
-| `update`     | `false`     | force update `package.json` to latest versions                                               |
-| `json`       | `false`     | output JSON results to `stdout`                                                              |
-| `silent`     | `false`     | do not output report on `stderr`                                                             |
+| `update`     | `false`     | **BREAKING CHANGE**: launch interactive mode to select and update packages (v4.0.0+)         |
+| `all`        | `false`     | auto-update all outdated packages without prompting (requires `--update`)                    |
+| `json`       | `false`     | output JSON results to `stdout` (incompatible with `--update`)                               |
+| `silent`     | `false`     | do not output report on `stderr` (incompatible with `--update`)                              |
 | `no-color`   | `false`     | disable color output                                                                         |
 | `help`       | `N/A`       | display cli help                                                                             |
 
@@ -149,6 +204,42 @@ By default `updated` will check for the following types in your `package.json`
 - peerDependencies
 
 > **Note**: dependency types is an arbitrary string value, your `package.json` can contain additional types beyond the ones listed here, just include them using `--types` and updated will attempt to check their status.
+
+## Breaking Changes
+
+### Version 4.0.0: Interactive Mode
+
+The `--update` flag behavior has changed in v4.0.0:
+
+**Before v4.0.0:**
+- `--update` would automatically update ALL outdated packages without prompting
+
+**After v4.0.0:**
+- `--update` launches an interactive mode where you can select which packages to update
+- `--update --all` automatically updates all outdated packages (equivalent to old behavior)
+
+#### Migration Guide
+
+If you were using `--update` in CI/CD pipelines or automated scripts:
+
+**Old command:**
+```bash
+updated --update
+```
+
+**New command (for same behavior):**
+```bash
+updated --update --all
+```
+
+**Why this change?**
+The new interactive mode provides better control over package updates, allowing you to:
+- Review each package before updating
+- Select specific packages to update
+- Preview changes before applying
+- Filter by ecosystem and workspace
+
+For automated environments, the `--all` flag preserves the original behavior.
 
 ## Exit Codes
 
