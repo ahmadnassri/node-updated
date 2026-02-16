@@ -41,7 +41,8 @@ describe('flags', () => {
     const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--types=dependencies'], { cwd: join(fixtures, 'outdated') })
 
     expect(stderr.toString()).toMatch(/connect/)
-    expect(stderr.toString()).not.toMatch(/npm/)
+    // Check that npm package (from peerDependencies) is not listed in the table
+    expect(stderr.toString()).not.toMatch(/│\s+npm\s+│/)
     expect(status).toBe(1)
   })
 
@@ -55,7 +56,8 @@ describe('flags', () => {
   test('with scopes', () => {
     const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--scopes=fastify'], { cwd: join(fixtures, 'outdated') })
 
-    expect(stderr.toString()).not.toMatch(/npm/)
+    // Check that npm package (not fastify-scoped) is not listed in the table
+    expect(stderr.toString()).not.toMatch(/│\s+npm\s+│/)
     expect(status).toBe(1)
   })
 
