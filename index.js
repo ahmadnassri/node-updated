@@ -50,7 +50,8 @@ async function main (filename, workspace) {
   let updated = false
 
   const data = []
-  const grid = new Grid()
+  const gridTitle = workspace === '.' ? '📦 npm Packages (root)' : workspace ? `📦 npm Packages (${workspace})` : '📦 npm Packages'
+  const grid = new Grid(gridTitle)
 
   for (const dependency of dependencies) {
     // check dependency
@@ -83,13 +84,23 @@ async function main (filename, workspace) {
       updated = true
     }
 
-    // convert to upper case
+    // Status icons and formatting
+    const statusIcons = {
+      OUTDATED: '⚠️  ' + magenta('OUTDATED'),
+      DEPRECATED: '🚨 ' + red('DEPRECATED'),
+      UPDATED: '✅ ' + green('UPDATED'),
+      'NOT-SUPPORTED': '❌ ' + red('NOT-SUPPORTED'),
+      'NOT-FOUND': '🔍 ' + red('NOT-FOUND'),
+      ERROR: '❌ ' + red('ERROR')
+    }
+
     status = status.toUpperCase()
+    const statusDisplay = statusIcons[status] || magenta(status)
 
     grid.row([
-      ['NOT-SUPPORTED', 'NOT-FOUND', 'ERROR'].includes(status) ? red(status) : magenta(status),
+      statusDisplay,
       `${name}${light(':')} ${gray(current)}`,
-      latest ? `${cyan(current)} → ${green(latest)}` : null
+      latest ? `${cyan(current)} ${light('→')} ${green(latest)}` : gray('—')
     ])
   }
 
@@ -152,8 +163,17 @@ try {
 
       if (dependencies.length === 0) continue
 
-      const grid = new Grid()
+      const dockerTitle = `🐋 Docker Images (${composeFile})`
+      const grid = new Grid(dockerTitle)
       let exitCode = false
+
+      // Status icons for Docker
+      const dockerStatusIcons = {
+        OUTDATED: '⚠️  ' + magenta('OUTDATED'),
+        'NOT-SUPPORTED': '❌ ' + red('NOT-SUPPORTED'),
+        'NOT-FOUND': '🔍 ' + red('NOT-FOUND'),
+        ERROR: '❌ ' + red('ERROR')
+      }
 
       for (const dependency of dependencies) {
         const result = await dockerEcosystem.check(dependency)
@@ -167,17 +187,16 @@ try {
         if (status !== 'not-supported') exitCode = true
 
         const statusUpper = status.toUpperCase()
+        const statusDisplay = dockerStatusIcons[statusUpper] || magenta(statusUpper)
 
         grid.row([
-          ['NOT-SUPPORTED', 'NOT-FOUND', 'ERROR'].includes(statusUpper) ? red(statusUpper) : magenta(statusUpper),
+          statusDisplay,
           `${name}${light(':')} ${gray(current)}`,
-          latest ? `${cyan(current)} → ${green(latest)}` : null
+          latest ? `${cyan(current)} ${light('→')} ${green(latest)}` : gray('—')
         ])
       }
 
       if (!cliArguments.silent && !cliArguments.json && grid.rows.length > 0) {
-        console.log() // Empty line before Docker results
-        console.log(gray(`=== ${composeFile} ===`))
         grid.render()
       }
 
