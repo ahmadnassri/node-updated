@@ -16,6 +16,21 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
 import DockerEcosystem from './lib/ecosystems/docker/index.js'
 
+// Validate flag combinations
+if (cliArguments.update && !cliArguments.all) {
+  if (cliArguments.json) {
+    console.error('❌ Cannot use --json with interactive --update mode')
+    console.error('💡 Use --update --all --json for non-interactive JSON output')
+    process.exit(1)
+  }
+
+  if (cliArguments.silent) {
+    console.error('❌ Cannot use --silent with interactive --update mode')
+    console.error('💡 Use --update --all --silent for non-interactive mode')
+    process.exit(1)
+  }
+}
+
 console.time('completed in')
 
 // construct full path to package.json
