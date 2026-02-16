@@ -34,9 +34,9 @@
   ],
   "bin": "index.js",
   "scripts": {
-    "test": "bun test",
-    "test:watch": "bun test --watch",
-    "test:ci": "bun test",
+    "test": "bun test ./test/*.js ./test/ecosystems/*.js",
+    "test:watch": "bun test --watch ./test/*.js ./test/ecosystems/*.js",
+    "test:ci": "bun test ./test/*.js ./test/ecosystems/*.js",
     "build": "bun run build:all",
     "build:all": "bun run build:linux && bun run build:macos-arm && bun run build:macos-x64 && bun run build:windows",
     "build:linux": "bun build --compile --target=bun-linux-x64 ./index.js --outfile dist/updated-linux-x64",
