@@ -1,14 +1,13 @@
-import { describe, test } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, expect } from 'bun:test'
 import DockerEcosystem from '../../lib/ecosystems/docker/index.js'
 
 describe('Docker Ecosystem', () => {
   test('should have correct name', () => {
-    assert.equal(DockerEcosystem.name, 'docker')
+    expect(DockerEcosystem.name).toBe('docker')
   })
 
   test('should have correct manifest files', () => {
-    assert.deepEqual(DockerEcosystem.manifestFiles, ['compose.yml', 'docker-compose.yml'])
+    expect(DockerEcosystem.manifestFiles).toEqual(['compose.yml', 'docker-compose.yml'])
   })
 
   test('should check outdated image', async () => {
@@ -21,7 +20,7 @@ describe('Docker Ecosystem', () => {
     })
 
     // Should detect old version as outdated or return not-supported for variant issues
-    assert.ok(['outdated', 'not-supported', 'not-found'].includes(result?.status))
+    expect(['outdated', 'not-supported', 'not-found'].includes(result?.status)).toBeTruthy()
   })
 
   test('should handle not-supported tags', async () => {
@@ -33,7 +32,7 @@ describe('Docker Ecosystem', () => {
       ecosystem: 'docker'
     })
 
-    assert.equal(result.status, 'not-supported')
+    expect(result.status).toBe('not-supported')
   })
 
   test('should handle digest-based images', async () => {
@@ -45,6 +44,6 @@ describe('Docker Ecosystem', () => {
       ecosystem: 'docker'
     })
 
-    assert.equal(result.status, 'not-supported')
+    expect(result.status).toBe('not-supported')
   })
 })
