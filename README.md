@@ -20,12 +20,13 @@ While there are [many package dependency checking tools][], they all come with s
   `npm`'s `outdated` command seems to attempt to address some of the basics, however, it only works for production `dependencies` *(and `devDependencies` if you add the hidden `-D` flag!)* but not both at the same time!
   `optionalDependencies` and `peerDependencies` are not included.
 
-This utility addresses these issues **by using the npm registry API directly via `npm-registry-fetch`**, which:
+This utility addresses these issues **by using the npm registry API directly with a Bun-native implementation**, which:
 
-- Works without requiring npm CLI to be installed
+- Works as a standalone binary without requiring Bun, Node.js, or npm to be installed
 - Properly handles `.npmrc` configuration, authentication, and custom registries
-- Uses the same library that npm CLI uses internally for registry access
+- Built with [Bun](https://bun.sh) for superior performance and smaller bundle sizes
 - Maintains proper exit codes and standard streams for CI compatibility
+- Blazingly fast startup and execution times
 
 **Hopefully, `npm outdated` will evolve and make this tool irrelevant!**
 
@@ -47,8 +48,8 @@ The following types of packages are not supported:
 - **Minimal dependencies**
   uses `npm-registry-fetch` (the official npm registry client) and `semver` to keep the package lean for CI use.
 
-- **Works without npm CLI**
-  uses the npm registry API directly, which means it works in any Node.js environment without requiring npm CLI to be installed.
+- **Zero Dependencies**
+  standalone binaries work without requiring Bun, Node.js, or npm to be installed - download and run.
 
 - **Proper authentication**
   automatically reads `.npmrc` configuration for authentication tokens and custom registries, supporting private packages and scoped registries.
@@ -66,9 +67,42 @@ The following types of packages are not supported:
 
 ## Install
 
-``` bash
-npm install updated
+### Binary Download (Recommended)
+
+Download the standalone binary for your platform from the [latest release](https://github.com/ahmadnassri/node-updated/releases/latest):
+
+**Linux x64:**
+```bash
+curl -L https://github.com/ahmadnassri/node-updated/releases/latest/download/updated-linux-x64 -o updated
+chmod +x updated
+./updated
 ```
+
+**macOS (Apple Silicon):**
+```bash
+curl -L https://github.com/ahmadnassri/node-updated/releases/latest/download/updated-darwin-arm64 -o updated
+chmod +x updated
+./updated
+```
+
+**macOS (Intel):**
+```bash
+curl -L https://github.com/ahmadnassri/node-updated/releases/latest/download/updated-darwin-x64 -o updated
+chmod +x updated
+./updated
+```
+
+**Windows:**
+Download `updated-windows-x64.exe` from the releases page and run it.
+
+### npm Install
+
+```bash
+npm install -g updated
+updated
+```
+
+> **Note**: The npm package includes a postinstall script that downloads the appropriate binary for your platform.
 
 ## Usage
 
@@ -122,6 +156,39 @@ By default `updated` will check for the following types in your `package.json`
 |------|-------------|
 | `0`  | success     |
 | `1`  | failure     |
+
+## Development
+
+### Requirements
+
+- **Bun** >=1.0.0
+
+### Setup
+
+```bash
+git clone https://github.com/ahmadnassri/node-updated.git
+cd node-updated
+bun install
+```
+
+### Testing
+
+```bash
+bun test              # Run all tests
+bun test --watch      # Watch mode
+```
+
+### Building Binaries
+
+```bash
+bun run build         # Build all platforms
+bun run build:linux   # Build Linux only
+bun run build:macos-arm  # Build macOS ARM64 only
+bun run build:macos-x64  # Build macOS Intel only
+bun run build:windows    # Build Windows only
+```
+
+Binaries are output to `dist/` directory.
 
   [many package dependency checking tools]: https://www.npmjs.com/search?q=check%20updates
   [`npm outdated`]: https://docs.npmjs.com/cli/outdated
