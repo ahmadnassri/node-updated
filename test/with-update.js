@@ -2,8 +2,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { readFile, cp, rm, mkdtemp } from 'fs/promises'
 import { spawnSync } from 'child_process'
-import { describe, test, beforeEach, afterEach } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, beforeEach, afterEach, expect } from 'bun:test'
 
 // node v18 support
 import { dirname } from 'node:path'
@@ -27,9 +26,7 @@ describe('with --update', () => {
 
   afterEach(() => rm(cwd, fsOpts))
 
-  test('updates package.json', async t => {
-    // t.plan(3)
-
+  test('updates package.json', async () => {
     // prep fixture
     await cp(join(fixtures, 'outdated'), cwd, fsOpts)
 
@@ -42,14 +39,12 @@ describe('with --update', () => {
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
 
-    assert.notEqual(before, after)
-    assert.equal(after.devDependencies.once, '^1.4.0')
-    assert.equal(result.status, 0)
+    expect(before).not.toEqual(after)
+    expect(after.devDependencies.once).toBe('^1.4.0')
+    expect(result.status).toBe(0)
   })
 
-  test('updates nothing with empty types', async t => {
-    // t.plan(3)
-
+  test('updates nothing with empty types', async () => {
     // prep fixture
     await cp(join(fixtures, 'outdated'), cwd, fsOpts)
 
@@ -62,8 +57,8 @@ describe('with --update', () => {
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
 
-    assert.deepEqual(before, after)
-    assert.equal(after.devDependencies.once, '^1.3.1')
-    assert.equal(result.status, 0)
+    expect(before).toEqual(after)
+    expect(after.devDependencies.once).toBe('^1.3.1')
+    expect(result.status).toBe(0)
   })
 })
