@@ -1,5 +1,4 @@
-import { describe, test } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, expect } from 'bun:test'
 import { fetchTags } from '../../lib/ecosystems/docker/registry.js'
 
 describe('Docker Registry Client', () => {
@@ -7,14 +6,14 @@ describe('Docker Registry Client', () => {
     // This is an integration test that hits the real registry
     const tags = await fetchTags('docker.io', 'library/nginx')
 
-    assert.ok(Array.isArray(tags))
-    assert.ok(tags.length > 0)
-    assert.ok(tags.includes('latest'))
+    expect(Array.isArray(tags)).toBeTruthy()
+    expect(tags.length > 0).toBeTruthy()
+    expect(tags.includes('latest')).toBeTruthy()
   })
 
   test('should handle registry errors gracefully', async () => {
     const tags = await fetchTags('docker.io', 'nonexistent-image-definitely-not-found-12345')
-    assert.equal(tags, null)
+    expect(tags).toBe(null)
   })
 
   test('should handle custom registries', async () => {
@@ -22,6 +21,6 @@ describe('Docker Registry Client', () => {
     const tags = await fetchTags('ghcr.io', 'homebrew/core')
 
     // This should either return tags or null (if image doesn't exist or requires auth)
-    assert.ok(tags === null || Array.isArray(tags))
+    expect(tags === null || Array.isArray(tags)).toBeTruthy()
   })
 })
