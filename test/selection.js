@@ -1,5 +1,46 @@
 import { describe, test, expect } from 'bun:test'
-import { buildSelectionState } from '../lib/selection.js'
+import { buildSelectionState, buildPromptChoices } from '../lib/selection.js'
+
+describe('buildPromptChoices', () => {
+  test('formats npm packages for prompts multiselect', () => {
+    const packages = [
+      { name: 'semver', type: 'dependencies', current: '^7.3.7', latest: '7.6.0', status: 'outdated' },
+      { name: 'prompts', type: 'dependencies', current: '^2.4.2', latest: '2.4.2', status: 'updated' },
+      { name: 'request', type: 'dependencies', current: '^2.88', latest: null, status: 'deprecated' }
+    ]
+
+    const choices = buildPromptChoices(packages, 'npm')
+
+    expect(choices).toHaveLength(3)
+
+    // Outdated package
+    expect(choices[0].title).toBe('semver: ^7.3.7 → 7.6.0 (OUTDATED)')
+    expect(choices[0].value).toEqual({ name: 'semver', type: 'dependencies', current: '^7.3.7', latest: '7.6.0' })
+    expect(choices[0].selected).toBe(true)
+    expect(choices[0].disabled).toBe(false)
+
+    // Updated package (disabled)
+    expect(choices[1].title).toContain('already updated')
+    expect(choices[1].disabled).toBe(true)
+    expect(choices[1].selected).toBe(false)
+
+    // Deprecated package
+    expect(choices[2].title).toContain('remove')
+    expect(choices[2].selected).toBe(true)
+  })
+
+  test('formats docker images for prompts multiselect', () => {
+    const images = [
+      { service: 'app', image: 'node', current: '20', latest: '22', status: 'outdated' },
+      { service: 'db', image: 'postgres', current: '15', latest: '15', status: 'updated' }
+    ]
+
+    const choices = buildPromptChoices(images, 'docker')
+
+    expect(choices[0].title).toBe('app (node): 20 → 22 (OUTDATED)')
+    expect(choices[0].value).toEqual({ service: 'app', image: 'node', current: '20', latest: '22' })
+  })
+})
 
 describe('buildSelectionState', () => {
   test('groups npm packages by workspace', () => {
