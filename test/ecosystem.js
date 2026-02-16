@@ -1,37 +1,27 @@
-import { describe, test } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, expect } from 'bun:test'
 import Ecosystem from '../lib/ecosystem.js'
 
 describe('Ecosystem Base Class', () => {
   test('should throw on unimplemented name getter', () => {
-    assert.throws(() => Ecosystem.name, /Must implement/)
+    expect(() => Ecosystem.name).toThrow(/Must implement/)
   })
 
   test('should throw on unimplemented manifestFiles getter', () => {
-    assert.throws(() => Ecosystem.manifestFiles, /Must implement/)
+    expect(() => Ecosystem.manifestFiles).toThrow(/Must implement/)
   })
 
   test('should throw on unimplemented parse method', async () => {
     const ecosystem = new Ecosystem()
-    await assert.rejects(
-      async () => await ecosystem.parse({}),
-      /Must implement/
-    )
+    await expect(ecosystem.parse({})).rejects.toThrow(/Must implement/)
   })
 
   test('should throw on unimplemented check method', async () => {
     const ecosystem = new Ecosystem()
-    await assert.rejects(
-      async () => await ecosystem.check({}),
-      /Must implement/
-    )
+    await expect(ecosystem.check({})).rejects.toThrow(/Must implement/)
   })
 
   test('should throw on unimplemented update method', async () => {
     const ecosystem = new Ecosystem()
-    await assert.rejects(
-      async () => await ecosystem.update([]),
-      /Must implement/
-    )
+    await expect(ecosystem.update([])).rejects.toThrow(/Must implement/)
   })
 })
