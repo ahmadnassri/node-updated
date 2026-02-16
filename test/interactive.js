@@ -90,3 +90,33 @@ describe('selectPackages', () => {
     expect(result).toEqual({ packages: [], cancelled: false })
   })
 })
+
+describe('confirmChanges', () => {
+  test('formats npm package changes for preview', async () => {
+    const changes = [
+      { name: 'semver', type: 'dependencies', current: '^7.3.7', latest: '7.6.0', action: 'update' },
+      { name: 'request', type: 'dependencies', current: '^2.88', latest: null, action: 'remove' }
+    ]
+
+    const preview = await confirmChanges('package.json', changes, 'npm', true)
+
+    expect(preview).toContain('semver')
+    expect(preview).toContain('^7.3.7')
+    expect(preview).toContain('7.6.0')
+    expect(preview).toContain('request')
+    expect(preview).toContain('[REMOVED]')
+  })
+
+  test('formats docker image changes for preview', async () => {
+    const changes = [
+      { service: 'app', image: 'node', current: '20', latest: '22', action: 'update' }
+    ]
+
+    const preview = await confirmChanges('compose.yml', changes, 'docker', true)
+
+    expect(preview).toContain('app')
+    expect(preview).toContain('node')
+    expect(preview).toContain('20')
+    expect(preview).toContain('22')
+  })
+})
