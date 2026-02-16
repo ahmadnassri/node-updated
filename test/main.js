@@ -1,7 +1,6 @@
 import { join } from 'path'
 import { spawnSync } from 'child_process'
-import { describe, test } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, expect } from 'bun:test'
 
 // node v18 support
 import { dirname } from 'node:path'
@@ -16,96 +15,78 @@ const fixtures = join(__dirname, 'fixtures')
 const cmd = [join(__dirname, '..', 'index.js')]
 
 describe('main', () => {
-  test('success', t => {
-    // t.plan(1)
+  test('success', () => {
+    const { status } = spawnSync('bun', ['run', ...cmd], { cwd: join(fixtures, 'green') })
 
-    const { status } = spawnSync('node', [cmd], { cwd: join(fixtures, 'green') })
-
-    assert.equal(status, 0)
+    expect(status).toBe(0)
   })
 
-  test('handle not-found packages', t => {
-    // t.plan(2)
+  test('handle not-found packages', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: join(fixtures, 'not-found') })
 
-    const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'not-found') })
-
-    assert.match(stderr.toString(), /NOT-FOUND/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).toMatch(/NOT-FOUND/)
+    expect(status).toBe(1)
   })
 
-  test('detects outdated', t => {
-    // t.plan(2)
+  test('detects outdated', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: join(fixtures, 'outdated') })
 
-    const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'outdated') })
-
-    assert.match(stderr.toString(), /OUTDATED/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).toMatch(/OUTDATED/)
+    expect(status).toBe(1)
   })
 })
 
 describe('flags', () => {
-  test('with types', t => {
-    // t.plan(3)
+  test('with types', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--types=dependencies'], { cwd: join(fixtures, 'outdated') })
 
-    const { status, stderr } = spawnSync('node', [cmd, '--types=dependencies'], { cwd: join(fixtures, 'outdated') })
-
-    assert.match(stderr.toString(), /connect/)
-    assert.doesNotMatch(stderr.toString(), /npm/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).toMatch(/connect/)
+    expect(stderr.toString()).not.toMatch(/npm/)
+    expect(status).toBe(1)
   })
 
-  test('silent', async t => {
-    const { status, stderr } = spawnSync('node', [cmd, '--silent'], { cwd: join(fixtures, 'outdated') })
+  test('silent', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--silent'], { cwd: join(fixtures, 'outdated') })
 
-    assert.strictEqual(stderr.length, 0)
-    assert.strictEqual(status, 1)
+    expect(stderr.length).toBe(0)
+    expect(status).toBe(1)
   })
 
-  test('with scopes', t => {
-    // t.plan(2)
+  test('with scopes', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--scopes=fastify'], { cwd: join(fixtures, 'outdated') })
 
-    const { status, stderr } = spawnSync('node', [cmd, '--scopes=fastify'], { cwd: join(fixtures, 'outdated') })
-
-    assert.doesNotMatch(stderr.toString(), /npm/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).not.toMatch(/npm/)
+    expect(status).toBe(1)
   })
 
-  test('json output', t => {
-    // t.plan(2)
+  test('json output', () => {
+    const { status, stdout } = spawnSync('bun', ['run', ...cmd, '--json'], { cwd: join(fixtures, 'outdated') })
 
-    const { status, stdout } = spawnSync('node', [cmd, '--json'], { cwd: join(fixtures, 'outdated') })
-
-    assert.match(stdout.toString(), /"status":"outdated"/)
-    assert.equal(status, 1)
+    expect(stdout.toString()).toMatch(/"status":"outdated"/)
+    expect(status).toBe(1)
   })
 
-  test('ignore', t => {
-    // t.plan(2)
+  test('ignore', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd, '--ignore=npm,connect,@fastify/basic-auth,once'], { cwd: join(fixtures, 'outdated') })
 
-    const { status, stderr } = spawnSync('node', [cmd, '--ignore=npm,connect,@fastify/basic-auth,once'], { cwd: join(fixtures, 'outdated') })
-
-    assert.match(stderr.toString(), /NOT-SUPPORTED/)
-    assert.equal(status, 0)
+    expect(stderr.toString()).toMatch(/NOT-SUPPORTED/)
+    expect(status).toBe(0)
   })
 })
 
 describe('exceptions', () => {
-  test('package.json exception', t => {
-    // t.plan(2)
+  test('package.json exception', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: fixtures })
 
-    const { status, stderr } = spawnSync('node', [cmd], { cwd: fixtures })
-
-    assert.match(stderr.toString(), /Cannot find module/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).toMatch(/ENOENT|Cannot find module/)
+    expect(status).toBe(1)
   })
 
-  test('spawn exception', t => {
-    // t.plan(2)
+  test('spawn exception', () => {
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: join(fixtures, 'invalid') })
 
-    const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'invalid') })
-
-    // npm-registry-fetch validates package names and returns NOT-FOUND for invalid names
-    assert.match(stderr.toString(), /NOT-FOUND/)
-    assert.equal(status, 1)
+    // Our Bun-native registry client validates package names and returns NOT-FOUND for invalid names
+    expect(stderr.toString()).toMatch(/NOT-FOUND/)
+    expect(status).toBe(1)
   })
 })
