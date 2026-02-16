@@ -45,7 +45,6 @@
     "build:windows": "bun build --compile --target=bun-windows-x64 ./index.js --outfile dist/updated-windows-x64.exe"
   },
   "dependencies": {
-    "npm-registry-fetch": "^17.0.0",
     "prompts": "^2.4.2",
     "semver": "^7.3.7",
     "yaml": "^2.3.4"
