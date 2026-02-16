@@ -177,6 +177,104 @@ This is useful for automated scripts and CI/CD pipelines.
 >
 > ***Tip**: You don't need to install this package or add it to your dependencies, just run `npx updated`*
 
+## Usage as GitHub Action
+
+`updated` can also run as a GitHub Action to automatically check and update dependencies in CI/CD workflows.
+
+### Basic Usage (Check Only)
+
+```yaml
+name: Check Dependencies
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ahmadnassri/node-updated@v4
+        with:
+          update: false  # Report mode (default)
+```
+
+### Auto-Update with Pull Request
+
+```yaml
+name: Update Dependencies
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Weekly on Monday
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ahmadnassri/node-updated@v4
+        with:
+          update: true
+          create-pr: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Add PR Comment
+
+```yaml
+name: Dependency Report
+on: [pull_request]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ahmadnassri/node-updated@v4
+        with:
+          add-comment: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Action Inputs
+
+| Input | Default | Description |
+|-------|---------|-------------|
+| `update` | `false` | Enable auto-update mode |
+| `types` | `dependencies,devDependencies,optionalDependencies` | Comma-separated dependency types |
+| `scopes` | ` ` | Filter by package scopes (e.g., `@fastify,@types`) |
+| `ignore` | ` ` | Comma-separated packages to ignore |
+| `workspaces` | `false` | Check all workspaces in monorepo |
+| `create-pr` | `false` | Create PR with updates (requires `update: true`) |
+| `commit-directly` | `false` | Commit directly to branch (requires `update: true`) |
+| `add-comment` | `false` | Add report as PR comment |
+| `token` | `${{ github.token }}` | GitHub token for PR/commit operations |
+
+### Action Outputs
+
+| Output | Description |
+|--------|-------------|
+| `outdated-count` | Number of outdated packages found |
+| `deprecated-count` | Number of deprecated packages found |
+| `report` | Full report as JSON array |
+| `updated` | Whether files were updated (`true`/`false`) |
+| `pr-number` | PR number (if `create-pr: true`) |
+| `pr-url` | PR URL (if `create-pr: true`) |
+
+### Features
+
+- **Annotations**: Outdated/deprecated packages appear as warnings in the GitHub UI
+- **PR Creation**: Automatically creates PRs with formatted dependency tables
+- **PR Comments**: Posts/updates dependency reports as PR comments
+- **Monorepo Support**: Works with npm workspaces
+- **Docker Support**: Checks Docker image versions in compose files
+
 ## CLI Options
 
 > Options are applied using `--[option]=[value]` syntax
