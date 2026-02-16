@@ -16,14 +16,14 @@ const cmd = [join(__dirname, '..', 'index.js')]
 
 describe('workspaces', () => {
   test('does not process workspaces by default', () => {
-    const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'workspaces') })
+    const { status, stderr } = spawnSync('bun', ['run', ...cmd], { cwd: join(fixtures, 'workspaces') })
 
     expect(stderr.toString()).not.toMatch(/processing workspace/)
     expect(status).toBe(1)
   })
 
   test('with --workspaces', () => {
-    const { status, stdout } = spawnSync('node', [cmd, '--workspaces'], { cwd: join(fixtures, 'workspaces') })
+    const { status, stdout } = spawnSync('bun', ['run', ...cmd, '--workspaces'], { cwd: join(fixtures, 'workspaces') })
 
     expect(stdout.toString()).toMatch(/processing workspace: root/)
     expect(stdout.toString()).toMatch(/processing workspace: packages\/foo/)

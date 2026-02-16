@@ -34,7 +34,7 @@ describe('with --update', () => {
     const before = JSON.parse(await readFile(join(fixtures, 'outdated', 'package.json')))
 
     // run
-    const result = spawnSync('node', [cmd, '--update'], { cwd })
+    const result = spawnSync('bun', ['run', cmd, '--update'], { cwd })
 
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
@@ -52,7 +52,7 @@ describe('with --update', () => {
     const before = JSON.parse(await readFile(join(fixtures, 'outdated', 'package.json')))
 
     // run
-    const result = spawnSync('node', [cmd, '--update', '--types='], { cwd })
+    const result = spawnSync('bun', ['run', cmd, '--update', '--types='], { cwd })
 
     // read after state
     const after = JSON.parse(await readFile(join(cwd, 'package.json')))
