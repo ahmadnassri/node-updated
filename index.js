@@ -1,7 +1,5 @@
 #!/usr/bin/env bun
 
-import module from 'node:module'
-
 // process cli args
 import cliArguments from './lib/args.js'
 
@@ -10,7 +8,6 @@ import './lib/uncaught.js'
 
 // modules
 import { join } from 'node:path'
-import { writeFile } from 'node:fs/promises'
 
 import Grid from './lib/grid.js'
 import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
@@ -19,15 +16,14 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
 import DockerEcosystem from './lib/ecosystems/docker/index.js'
 
-const require = module.createRequire(import.meta.url)
-
 console.time('completed in')
 
 // construct full path to package.json
 const filename = join(process.cwd(), 'package.json')
 
 // check for workspaces in root package.json
-const workspaces = require(filename).workspaces || []
+const rootPackage = await Bun.file(filename).json()
+const workspaces = rootPackage.workspaces || []
 
 /**
  *
@@ -48,7 +44,7 @@ async function main (filename, workspace) {
   }
 
   // read package.json (still needed for update logic)
-  const packageJson = require(filename)
+  const packageJson = await Bun.file(filename).json()
 
   let exitCode = false
   let updated = false
@@ -107,7 +103,7 @@ async function main (filename, workspace) {
     exitCode = false
 
     if (updated) {
-      await writeFile(filename, JSON.stringify(packageJson, null, 2) + '\n')
+      await Bun.write(filename, JSON.stringify(packageJson, null, 2) + '\n')
 
       console.error(gray('package.json updated'), red('you should run'), 'npm install', red('to refresh your package-lock.json file'))
     } else {
