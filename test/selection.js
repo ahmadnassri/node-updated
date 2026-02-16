@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test'
-import { buildSelectionState, buildPromptChoices } from '../lib/selection.js'
+import { join } from 'path'
+import { buildSelectionState, buildPromptChoices, applyUpdates } from '../lib/selection.js'
 
 describe('buildPromptChoices', () => {
   test('formats npm packages for prompts multiselect', () => {
@@ -90,5 +91,59 @@ describe('buildSelectionState', () => {
     // Only outdated should be in selections
     expect(state.npm.selections.root).toHaveLength(1)
     expect(state.npm.selections.root[0].name).toBe('semver')
+  })
+})
+
+describe('applyUpdates', () => {
+  const fixturesDir = join(import.meta.dir, 'fixtures', 'interactive')
+
+  test('updates package.json with selected versions', async () => {
+    // Create temp package.json
+    const testDir = join(fixturesDir, 'update-test')
+    await Bun.write(
+      join(testDir, 'package.json'),
+      JSON.stringify({
+        dependencies: {
+          semver: '^7.3.7',
+          yaml: '^2.3.4',
+          prompts: '^2.4.2'
+        }
+      }, null, 2)
+    )
+
+    const selections = [
+      { name: 'semver', type: 'dependencies', latest: '7.6.0', action: 'update' },
+      { name: 'yaml', type: 'dependencies', latest: '2.5.1', action: 'update' }
+    ]
+
+    await applyUpdates(join(testDir, 'package.json'), selections, 'npm')
+
+    const updated = await Bun.file(join(testDir, 'package.json')).json()
+    expect(updated.dependencies.semver).toBe('^7.6.0')
+    expect(updated.dependencies.yaml).toBe('^2.5.1')
+    expect(updated.dependencies.prompts).toBe('^2.4.2') // unchanged
+  })
+
+  test('removes deprecated packages from package.json', async () => {
+    const testDir = join(fixturesDir, 'remove-test')
+    await Bun.write(
+      join(testDir, 'package.json'),
+      JSON.stringify({
+        dependencies: {
+          request: '^2.88',
+          semver: '^7.3.7'
+        }
+      }, null, 2)
+    )
+
+    const selections = [
+      { name: 'request', type: 'dependencies', latest: null, action: 'remove' }
+    ]
+
+    await applyUpdates(join(testDir, 'package.json'), selections, 'npm')
+
+    const updated = await Bun.file(join(testDir, 'package.json')).json()
+    expect(updated.dependencies.request).toBeUndefined()
+    expect(updated.dependencies.semver).toBe('^7.3.7') // unchanged
   })
 })
