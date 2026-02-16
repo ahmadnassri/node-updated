@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { parseNpmrc, buildRegistryUrl, fetchRegistry } from '../../lib/ecosystems/npm/registry-client.js'
+import { parseNpmrc, buildRegistryUrl, fetchRegistry, queryRegistry } from '../../lib/ecosystems/npm/registry-client.js'
 
 describe('parseNpmrc', () => {
   test('should parse default registry', async () => {
@@ -69,5 +69,20 @@ describe('fetchRegistry', () => {
     const url = 'https://registry.npmjs.org/this-package-definitely-does-not-exist-12345'
 
     await expect(fetchRegistry(url, null)).rejects.toThrow('not found')
+  })
+})
+
+describe('queryRegistry', () => {
+  test('should query package with version', async () => {
+    const result = await queryRegistry('semver', '7.3.7')
+
+    expect(result).toBeDefined()
+    expect(result.name).toBe('semver')
+    expect(result.version).toBe('7.3.7')
+  })
+
+  test('should return null for non-existent package', async () => {
+    const result = await queryRegistry('this-package-definitely-does-not-exist-12345', '1.0.0')
+    expect(result).toBeNull()
   })
 })
