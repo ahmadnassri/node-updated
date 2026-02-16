@@ -26,7 +26,7 @@
     "outdated"
   ],
   "engines": {
-    "node": ">=24"
+    "bun": ">=1.0.0"
   },
   "files": [
     "lib",
@@ -34,8 +34,15 @@
   ],
   "bin": "index.js",
   "scripts": {
-    "test": "node --test --test-reporter=spec 'test/**/*.js'",
-    "test:ci": "npm run test"
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:ci": "bun test",
+    "build": "bun run build:all",
+    "build:all": "bun run build:linux && bun run build:macos-arm && bun run build:macos-x64 && bun run build:windows",
+    "build:linux": "bun build --compile --target=bun-linux-x64 ./index.js --outfile dist/updated-linux-x64",
+    "build:macos-arm": "bun build --compile --target=bun-darwin-arm64 ./index.js --outfile dist/updated-darwin-arm64",
+    "build:macos-x64": "bun build --compile --target=bun-darwin-x64 ./index.js --outfile dist/updated-darwin-x64",
+    "build:windows": "bun build --compile --target=bun-windows-x64 ./index.js --outfile dist/updated-windows-x64.exe"
   },
   "dependencies": {
     "npm-registry-fetch": "^17.0.0",
