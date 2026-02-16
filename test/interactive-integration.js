@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach } from 'bun:test'
 import { join } from 'path'
-import { runInteractiveUpdate } from '../lib/interactive.js'
-import { buildSelectionState } from '../lib/selection.js'
+import { runInteractiveUpdate } from '../lib/interfaces/cli/interactive.js'
+import { buildSelectionState } from '../lib/interfaces/cli/selection.js'
 import NpmEcosystem from '../lib/ecosystems/npm/index.js'
 import cliArguments from '../lib/args.js'
 

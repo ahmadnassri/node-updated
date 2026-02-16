@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
-import { selectEcosystem, selectLocations, selectPackages, confirmChanges, runInteractiveUpdate } from '../lib/interactive.js'
-import { buildPromptChoices, buildSelectionState } from '../lib/selection.js'
+import { selectEcosystem, selectLocations, selectPackages, confirmChanges, runInteractiveUpdate } from '../lib/interfaces/cli/interactive.js'
+import { buildPromptChoices, buildSelectionState } from '../lib/interfaces/cli/selection.js'
 
 describe('interactive prompts', () => {
   test('selectEcosystem formats ecosystem choices correctly', () => {

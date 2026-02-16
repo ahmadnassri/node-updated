@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { join } from 'path'
-import { buildSelectionState, buildPromptChoices, applyUpdates } from '../lib/selection.js'
+import { buildSelectionState, buildPromptChoices, applyUpdates } from '../lib/interfaces/cli/selection.js'
 
 describe('buildPromptChoices', () => {
   test('formats npm packages for prompts multiselect', () => {
