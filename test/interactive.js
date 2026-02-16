@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
-import { selectEcosystem, selectLocations, selectPackages, confirmChanges } from '../lib/interactive.js'
-import { buildPromptChoices } from '../lib/selection.js'
+import { selectEcosystem, selectLocations, selectPackages, confirmChanges, runInteractiveUpdate } from '../lib/interactive.js'
+import { buildPromptChoices, buildSelectionState } from '../lib/selection.js'
 
 describe('interactive prompts', () => {
   test('selectEcosystem formats ecosystem choices correctly', () => {
@@ -118,5 +118,45 @@ describe('confirmChanges', () => {
     expect(preview).toContain('node')
     expect(preview).toContain('20')
     expect(preview).toContain('22')
+  })
+})
+
+describe('runInteractiveUpdate', () => {
+  test('orchestrates full interactive flow for single ecosystem', async () => {
+    const items = [
+      { ecosystem: 'npm', workspace: 'root', name: 'semver', status: 'outdated', current: '^7.3.7', latest: '7.6.0', type: 'dependencies' }
+    ]
+
+    const state = buildSelectionState(items)
+
+    const mockResponses = {
+      ecosystemChoice: 'npm',
+      locationChoice: ['root'],
+      packageChoice: [{ name: 'semver', type: 'dependencies', current: '^7.3.7', latest: '7.6.0' }],
+      confirmAction: 'confirm'
+    }
+
+    const result = await runInteractiveUpdate(state, items, mockResponses, true)
+
+    expect(result.success).toBe(true)
+    expect(result.updated).toHaveLength(1)
+    expect(result.updated[0].location).toBe('root')
+  })
+
+  test('handles user cancellation at any stage', async () => {
+    const items = [
+      { ecosystem: 'npm', workspace: 'root', name: 'semver', status: 'outdated', current: '^7.3.7', latest: '7.6.0', type: 'dependencies' }
+    ]
+
+    const state = buildSelectionState(items)
+
+    const mockResponses = {
+      ecosystemChoice: undefined
+    }
+
+    const result = await runInteractiveUpdate(state, items, mockResponses, true)
+
+    expect(result.success).toBe(false)
+    expect(result.cancelled).toBe(true)
   })
 })
