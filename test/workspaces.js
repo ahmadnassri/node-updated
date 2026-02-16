@@ -1,7 +1,6 @@
 import { join } from 'path'
 import { spawnSync } from 'child_process'
-import { describe, test } from 'node:test'
-import assert from 'node:assert'
+import { describe, test, expect } from 'bun:test'
 
 // node v18 support
 import { dirname } from 'node:path'
@@ -16,22 +15,18 @@ const fixtures = join(__dirname, 'fixtures')
 const cmd = [join(__dirname, '..', 'index.js')]
 
 describe('workspaces', () => {
-  test('does not process workspaces by default', t => {
-    // t.plan(2)
-
+  test('does not process workspaces by default', () => {
     const { status, stderr } = spawnSync('node', [cmd], { cwd: join(fixtures, 'workspaces') })
 
-    assert.doesNotMatch(stderr.toString(), /processing workspace/)
-    assert.equal(status, 1)
+    expect(stderr.toString()).not.toMatch(/processing workspace/)
+    expect(status).toBe(1)
   })
 
-  test('with --workspaces', t => {
-    // t.plan(3)
-
+  test('with --workspaces', () => {
     const { status, stdout } = spawnSync('node', [cmd, '--workspaces'], { cwd: join(fixtures, 'workspaces') })
 
-    assert.match(stdout.toString(), /processing workspace: root/)
-    assert.match(stdout.toString(), /processing workspace: packages\/foo/)
-    assert.equal(status, 1)
+    expect(stdout.toString()).toMatch(/processing workspace: root/)
+    expect(stdout.toString()).toMatch(/processing workspace: packages\/foo/)
+    expect(status).toBe(1)
   })
 })
