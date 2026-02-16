@@ -16,6 +16,10 @@ import { magenta, cyan, red, green, gray, light } from './lib/colors.js'
 import NpmEcosystem from './lib/ecosystems/npm/index.js'
 import DockerEcosystem from './lib/ecosystems/docker/index.js'
 
+// Interactive mode
+import { runInteractiveUpdate } from './lib/interactive.js'
+import { buildSelectionState } from './lib/selection.js'
+
 // Validate flag combinations
 if (cliArguments.update && !cliArguments.all) {
   if (cliArguments.json) {
@@ -87,18 +91,6 @@ async function main (filename, workspace) {
     // send non-zero signal?
     if (status !== 'not-supported') exitCode = true
 
-    // should we update the package.json data?
-    if (status === 'outdated' && latest && cliArguments.update) {
-      // write to package.json data
-      packageJson[type][name] = `^${latest}`
-
-      // reflect in the log
-      status = 'updated'
-
-      // flag to update the file
-      updated = true
-    }
-
     // Status icons and formatting
     const statusIcons = {
       OUTDATED: '⚠️  ' + magenta('OUTDATED'),
@@ -121,12 +113,63 @@ async function main (filename, workspace) {
 
   if (!cliArguments.silent && !cliArguments.json) grid.render()
 
-  if (cliArguments.update) {
+  // Interactive mode handling
+  if (cliArguments.update && !cliArguments.all && data.some(d => d.status === 'outdated' || d.status === 'deprecated')) {
+    // Check if we're in a TTY environment
+    if (!process.stdin.isTTY || process.env.CI === 'true') {
+      console.error('\n❌ Interactive mode requires a TTY')
+      console.error('💡 Use --update --all for non-interactive mode, or run in a terminal')
+      return { exitCode: 1, data: [] }
+    }
+
+    // Add ecosystem and workspace info to data
+    const enrichedData = data.map(item => ({
+      ...item,
+      ecosystem: 'npm',
+      workspace: workspace || 'root'
+    }))
+
+    // Build selection state from results
+    const state = buildSelectionState(enrichedData)
+
+    // Run interactive update
+    const interactiveResult = await runInteractiveUpdate(state, enrichedData)
+
+    if (interactiveResult.cancelled) {
+      console.error('\n❌ Cancelled by user. No changes made.')
+      return { exitCode: 0, data: [] }
+    }
+
+    if (interactiveResult.error) {
+      console.error('\n❌ Error during interactive update:', interactiveResult.error)
+      return { exitCode: 1, data: [] }
+    }
+
+    if (interactiveResult.success) {
+      console.error('\n✅ Updated successfully:')
+      for (const update of interactiveResult.updated) {
+        console.error(`  • ${update.location}: ${update.changes} package${update.changes !== 1 ? 's' : ''}`)
+      }
+      console.error('\n💡 Run \'npm install\' to update your lock file')
+      return { exitCode: 0, data }
+    }
+  }
+
+  // Auto-update mode (--update --all)
+  if (cliArguments.update && cliArguments.all) {
     // empty line
     console.error()
 
     // don't fail!
     exitCode = false
+
+    // Apply updates to all outdated packages
+    for (const result of data) {
+      if (result.status === 'outdated' && result.latest) {
+        packageJson[result.type][result.name] = `^${result.latest}`
+        updated = true
+      }
+    }
 
     if (updated) {
       await Bun.write(filename, JSON.stringify(packageJson, null, 2) + '\n')
