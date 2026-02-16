@@ -1,0 +1,139 @@
+name: Test GitHub Action
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  # Test 1: Check only (no updates)
+  check-only:
+    name: Check Dependencies (Report Only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Updated Action (Check Only)
+        id: check
+        uses: ./
+        with:
+          update: false
+          workspaces: false
+
+      - name: Verify Outputs
+        run: |
+          echo "Outdated count: ${{ steps.check.outputs.outdated-count }}"
+          echo "Deprecated count: ${{ steps.check.outputs.deprecated-count }}"
+          echo "Updated: ${{ steps.check.outputs.updated }}"
+
+  # Test 2: Check with workspaces
+  check-workspaces:
+    name: Check with Workspaces
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Updated Action (Workspaces)
+        uses: ./
+        with:
+          update: false
+          workspaces: true
+
+  # Test 3: Filter by types
+  check-types:
+    name: Check Specific Types
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Updated Action (Dependencies Only)
+        uses: ./
+        with:
+          update: false
+          types: dependencies
+
+  # Test 4: Update mode (no PR)
+  update-no-pr:
+    name: Update Dependencies (No PR)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Updated Action (Update Mode)
+        uses: ./
+        with:
+          update: true
+          workspaces: false
+
+      - name: Check for Changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "✅ Files were updated"
+            git status
+          else
+            echo "✅ No updates needed or files unchanged"
+          fi
+
+  # Test 5: PR Comment (on pull_request event)
+  pr-comment:
+    name: Add PR Comment
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Updated Action (PR Comment)
+        uses: ./
+        with:
+          update: false
+          add-comment: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Test 6: Bundle verification
+  verify-bundle:
+    name: Verify Action Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Build Action Bundle
+        run: bun run bundle:action
+
+      - name: Verify Bundle Exists
+        run: |
+          if [ -f dist/action.cjs ]; then
+            echo "✅ Action bundle exists"
+            ls -lh dist/action.cjs
+          else
+            echo "❌ Action bundle missing"
+            exit 1
+          fi
+
+      - name: Check Bundle Size
+        run: |
+          SIZE=$(stat -f%z dist/action.cjs 2>/dev/null || stat -c%s dist/action.cjs)
+          echo "Bundle size: $SIZE bytes"
+          if [ $SIZE -gt 1000000 ]; then
+            echo "✅ Bundle is a reasonable size"
+          else
+            echo "⚠️ Bundle seems too small, may be incomplete"
+          fi
