@@ -1,0 +1,75 @@
+name: 'Updated - Dependency Checker'
+description: 'Check for outdated npm packages and Docker images, with optional auto-update and PR creation'
+author: 'Ahmad Nassri'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  # Authentication
+  token:
+    description: 'GitHub token for creating PRs and commits (defaults to github.token)'
+    required: false
+    default: ${{ github.token }}
+
+  # Update behavior
+  update:
+    description: 'Enable auto-update mode (apply updates to files)'
+    required: false
+    default: 'false'
+
+  # Filtering options
+  types:
+    description: 'Comma-separated list of dependency types to check (dependencies, devDependencies, optionalDependencies, peerDependencies)'
+    required: false
+    default: 'dependencies,devDependencies,optionalDependencies'
+
+  scopes:
+    description: 'Comma-separated list of scopes to check (e.g., @fastify, @types)'
+    required: false
+    default: ''
+
+  ignore:
+    description: 'Comma-separated list of package names to ignore'
+    required: false
+    default: ''
+
+  # Workspace support
+  workspaces:
+    description: 'Check all workspaces in a monorepo'
+    required: false
+    default: 'false'
+
+  # GitHub integration
+  create-pr:
+    description: 'Create a pull request with updates (requires update: true and token)'
+    required: false
+    default: 'false'
+
+  commit-directly:
+    description: 'Commit updates directly to current branch (requires update: true)'
+    required: false
+    default: 'false'
+
+  add-comment:
+    description: 'Add a comment to the PR with the report (when running on pull_request event)'
+    required: false
+    default: 'false'
+
+outputs:
+  outdated-count:
+    description: 'Number of outdated packages/images found'
+
+  deprecated-count:
+    description: 'Number of deprecated packages found'
+
+  report:
+    description: 'Full report as JSON array'
+
+  updated:
+    description: 'Whether any files were updated (true/false)'
+
+runs:
+  using: 'node20'
+  main: 'dist/action.cjs'
