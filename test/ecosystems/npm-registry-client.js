@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { parseNpmrc, buildRegistryUrl } from '../../lib/ecosystems/npm/registry-client.js'
+import { parseNpmrc, buildRegistryUrl, fetchRegistry } from '../../lib/ecosystems/npm/registry-client.js'
 
 describe('parseNpmrc', () => {
   test('should parse default registry', async () => {
@@ -52,5 +52,22 @@ describe('buildRegistryUrl', () => {
     const config = { registry: 'https://registry.npmjs.org', scopedRegistries: {} }
     const url = buildRegistryUrl('lodash', null, config)
     expect(url).toBe('https://registry.npmjs.org/lodash')
+  })
+})
+
+describe('fetchRegistry', () => {
+  test('should fetch package info from registry', async () => {
+    const url = 'https://registry.npmjs.org/semver/7.3.7'
+    const data = await fetchRegistry(url, null)
+
+    expect(data).toBeDefined()
+    expect(data.name).toBe('semver')
+    expect(data.version).toBe('7.3.7')
+  })
+
+  test('should throw NotFoundError for missing package', async () => {
+    const url = 'https://registry.npmjs.org/this-package-definitely-does-not-exist-12345'
+
+    await expect(fetchRegistry(url, null)).rejects.toThrow('not found')
   })
 })
