@@ -1,0 +1,9 @@
+{
+  "name": "interactive-test",
+  "version": "1.0.0",
+  "dependencies": {
+    "semver": "^7.3.7",
+    "yaml": "^2.3.4",
+    "prompts": "^2.4.2"
+  }
+}
