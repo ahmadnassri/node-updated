@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { selectEcosystem, selectLocations, selectPackages, confirmChanges } from '../lib/interactive.js'
+import { buildPromptChoices } from '../lib/selection.js'
 
 describe('interactive prompts', () => {
   test('selectEcosystem formats ecosystem choices correctly', () => {
@@ -61,5 +62,31 @@ describe('selectLocations', () => {
     const result = await selectLocations('npm', locations, selections, true)
 
     expect(result).toBe('root')
+  })
+})
+
+describe('selectPackages', () => {
+  test('uses buildPromptChoices to format package list', async () => {
+    const items = [
+      { name: 'semver', current: '^7.3.7', latest: '7.6.0', status: 'outdated', type: 'dependencies' },
+      { name: 'prompts', current: '^2.4.2', latest: '2.4.2', status: 'updated', type: 'dependencies' }
+    ]
+
+    const choices = await selectPackages(items, 'npm', true)
+
+    expect(choices).toHaveLength(2)
+    expect(choices[0].title).toContain('semver')
+    expect(choices[0].selected).toBe(true)
+    expect(choices[1].disabled).toBe(true)
+  })
+
+  test('handles empty selection gracefully', async () => {
+    const items = [
+      { name: 'semver', current: '^7.3.7', latest: '7.6.0', status: 'outdated', type: 'dependencies' }
+    ]
+
+    const result = await selectPackages(items, 'npm', true, [])
+
+    expect(result).toEqual({ packages: [], cancelled: false })
   })
 })
