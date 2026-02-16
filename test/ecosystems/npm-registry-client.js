@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { parseNpmrc } from '../../lib/ecosystems/npm/registry-client.js'
+import { parseNpmrc, buildRegistryUrl } from '../../lib/ecosystems/npm/registry-client.js'
 
 describe('parseNpmrc', () => {
   test('should parse default registry', async () => {
@@ -23,5 +23,34 @@ describe('parseNpmrc', () => {
     const content = '@myorg:registry=https://myorg.registry.com'
     const config = await parseNpmrc(content)
     expect(config.scopedRegistries['@myorg']).toBe('https://myorg.registry.com')
+  })
+})
+
+describe('buildRegistryUrl', () => {
+  test('should build URL for unscoped package', () => {
+    const config = { registry: 'https://registry.npmjs.org', scopedRegistries: {} }
+    const url = buildRegistryUrl('lodash', '4.17.21', config)
+    expect(url).toBe('https://registry.npmjs.org/lodash/4.17.21')
+  })
+
+  test('should build URL for scoped package with default registry', () => {
+    const config = { registry: 'https://registry.npmjs.org', scopedRegistries: {} }
+    const url = buildRegistryUrl('@babel/core', '7.0.0', config)
+    expect(url).toBe('https://registry.npmjs.org/@babel/core/7.0.0')
+  })
+
+  test('should use scoped registry for scoped package', () => {
+    const config = {
+      registry: 'https://registry.npmjs.org',
+      scopedRegistries: { '@myorg': 'https://myorg.registry.com' }
+    }
+    const url = buildRegistryUrl('@myorg/package', '1.0.0', config)
+    expect(url).toBe('https://myorg.registry.com/@myorg/package/1.0.0')
+  })
+
+  test('should build URL without version', () => {
+    const config = { registry: 'https://registry.npmjs.org', scopedRegistries: {} }
+    const url = buildRegistryUrl('lodash', null, config)
+    expect(url).toBe('https://registry.npmjs.org/lodash')
   })
 })
