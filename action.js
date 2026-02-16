@@ -16,6 +16,8 @@ import Engine from './lib/core/engine.js'
 // Action-specific interfaces
 import ActionInput from './lib/interfaces/action/input.js'
 import ActionOutput from './lib/interfaces/action/output.js'
+import PRCreator from './lib/interfaces/action/pr-creator.js'
+import Commenter from './lib/interfaces/action/commenter.js'
 
 /**
  * Main action execution
@@ -70,19 +72,62 @@ async function run () {
     output.finish(summary)
 
     // GitHub integration features (PR creation, commits, comments)
-    // These will be implemented in Tasks 15-17
     if (result.updated && token) {
-      if (createPr) {
-        core.info('PR creation will be implemented in Task 15')
-        // TODO: Task 15 - Create PR via pr-creator.js
-      } else if (commitDirectly) {
-        core.info('Direct commit will be implemented in Task 15')
-        // TODO: Task 15 - Commit directly via Octokit
-      }
+      const prCreator = new PRCreator(token)
 
-      if (addComment && github.context.payload.pull_request) {
-        core.info('PR comment will be implemented in Task 16')
-        // TODO: Task 16 - Add comment via commenter.js
+      try {
+        if (createPr) {
+          // Create PR with updated files
+          core.info('Creating pull request with updated dependencies...')
+
+          // Get list of updated files from result
+          const updatedFiles = result.updatedFiles || []
+          const baseBranch = github.context.ref.replace('refs/heads/', '')
+
+          const prResult = await prCreator.createUpdatePR(
+            updatedFiles,
+            result.data,
+            baseBranch
+          )
+
+          core.info(`✅ Pull request created: ${prResult.pr.url}`)
+          core.setOutput('pr-number', prResult.pr.number)
+          core.setOutput('pr-url', prResult.pr.url)
+        } else if (commitDirectly) {
+          // Commit directly to current branch
+          core.info('Committing updates directly to current branch...')
+
+          const updatedFiles = result.updatedFiles || []
+          const branchName = github.context.ref.replace('refs/heads/', '')
+          const commitMessage = 'chore: update dependencies\n\nCo-Authored-By: Updated Bot <noreply@github.com>'
+
+          await prCreator.commitFiles(branchName, updatedFiles, commitMessage)
+
+          core.info('✅ Changes committed successfully')
+        }
+      } catch (error) {
+        core.error(`GitHub integration failed: ${error.message}`)
+        // Don't fail the action, just warn
+        core.warning('Could not create PR/commit. Check token permissions and branch protection rules.')
+      }
+    }
+
+    // Add PR comment (independent of update/PR creation)
+    if (addComment && token && github.context.payload.pull_request) {
+      const commenter = new Commenter(token)
+
+      try {
+        core.info('Adding dependency report comment to PR...')
+
+        const commentResult = await commenter.addReportComment(
+          result.data,
+          summary
+        )
+
+        core.info(`✅ Comment ${commentResult.updated ? 'updated' : 'added'}: ${commentResult.url}`)
+      } catch (error) {
+        core.error(`Failed to add comment: ${error.message}`)
+        core.warning('Could not add PR comment. Check token permissions.')
       }
     }
 
